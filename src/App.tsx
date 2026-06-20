@@ -476,14 +476,6 @@ export default function App() {
                 Sync ({pendingChanges.length})
               </button>
             )}
-
-            <button
-              onClick={handleResetData}
-              className="text-[11px] font-bold text-rose-600 hover:text-white hover:bg-rose-500 border border-rose-200 hover:border-rose-500 px-3 py-2 rounded-xl transition-all duration-150 shrink-0 cursor-pointer"
-              title="Wipe current cache and restore initial demo clinical records"
-            >
-              Reset demo
-            </button>
           </div>
         </header>
 
