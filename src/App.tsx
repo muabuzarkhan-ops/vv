@@ -126,7 +126,9 @@ export default function App() {
     const pend = [record, ...pendingChanges];
     setPendingChanges(pend);
     localStorage.setItem('anesvad_pending_pushes', JSON.stringify(pend));
-    triggerNotification('success', "New record logged locally. Ready for cloud push.");
+    triggerNotification('success', record.approvalStatus === 'Approved'
+      ? "New approved record queued for upload."
+      : "New record logged locally pending admin approval.");
   };
 
   const handleUpdateRecord = (record: RecordItem) => {
@@ -211,10 +213,15 @@ export default function App() {
       headers['Authorization'] = `Bearer ${user.token}`;
     }
 
+    const approvedRecords = pendingChanges.filter((record) => record.approvalStatus === 'Approved');
+    if (approvedRecords.length === 0) {
+      throw new Error("No approved records are ready for upload. Admin approval is required before syncing field submissions.");
+    }
+
     const response = await fetch('/api/sync/push', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ records: pendingChanges })
+      body: JSON.stringify({ records: approvedRecords })
     });
 
     if (!response.ok) {
@@ -225,9 +232,10 @@ export default function App() {
     setRecords(data.records);
     localStorage.setItem('anesvad_records_cache', JSON.stringify(data.records));
 
-    // Clear pending pulls/pushes
-    setPendingChanges([]);
-    localStorage.removeItem('anesvad_pending_pushes');
+    // Clear only uploaded approved records from the pending queue
+    const remaining = pendingChanges.filter((record) => record.approvalStatus !== 'Approved');
+    setPendingChanges(remaining);
+    localStorage.setItem('anesvad_pending_pushes', JSON.stringify(remaining));
 
     const now = new Date().toISOString();
     setLastSyncedAt(now);

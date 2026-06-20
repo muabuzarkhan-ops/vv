@@ -29,6 +29,10 @@ interface RecordItem {
   reached: number;
   confidence: 'High' | 'Medium' | 'Low';
   source: string;
+  approvalStatus?: 'Pending' | 'Approved' | 'Rejected';
+  submittedBy?: string;
+  submittedByRole?: string;
+  approvedBy?: string;
   updatedAt?: string;
   updatedBy?: string;
 }
@@ -273,6 +277,10 @@ app.get("/api/records", async (req, res) => {
       reached: r.reached,
       confidence: r.confidence as 'High' | 'Medium' | 'Low',
       source: r.source,
+      approvalStatus: r.approvalStatus as 'Pending' | 'Approved' | 'Rejected' | undefined,
+      submittedBy: r.submittedBy || undefined,
+      submittedByRole: r.submittedByRole || undefined,
+      approvedBy: r.approvedBy || undefined,
       updatedAt: r.updatedAt.toISOString(),
       updatedBy: r.updatedBy || undefined
     }));
@@ -307,6 +315,10 @@ app.post("/api/records", requireAuth, async (req: AuthRequest, res) => {
         reached: item.reached,
         confidence: item.confidence,
         source: item.source,
+        approvalStatus: item.approvalStatus || 'Pending',
+        submittedBy: item.submittedBy || undefined,
+        submittedByRole: item.submittedByRole || undefined,
+        approvedBy: item.approvedBy || undefined,
         updatedAt: new Date(item.updatedAt || Date.now()),
         updatedBy: req.user!.uid,
       })
@@ -323,6 +335,10 @@ app.post("/api/records", requireAuth, async (req: AuthRequest, res) => {
           reached: item.reached,
           confidence: item.confidence,
           source: item.source,
+          approvalStatus: item.approvalStatus || 'Pending',
+          submittedBy: item.submittedBy || undefined,
+          submittedByRole: item.submittedByRole || undefined,
+          approvedBy: item.approvedBy || undefined,
           updatedAt: new Date(),
           updatedBy: req.user!.uid,
         }
@@ -381,6 +397,10 @@ app.get("/api/sync/pull", async (req, res) => {
       reached: r.reached,
       confidence: r.confidence as 'High' | 'Medium' | 'Low',
       source: r.source,
+      approvalStatus: r.approvalStatus as 'Pending' | 'Approved' | 'Rejected' | undefined,
+      submittedBy: r.submittedBy || undefined,
+      submittedByRole: r.submittedByRole || undefined,
+      approvedBy: r.approvedBy || undefined,
       updatedAt: r.updatedAt.toISOString(),
       updatedBy: r.updatedBy || undefined
     }));
@@ -412,6 +432,10 @@ app.post("/api/sync/push", requireAuth, async (req: AuthRequest, res) => {
         reached: item.reached,
         confidence: item.confidence,
         source: item.source,
+        approvalStatus: item.approvalStatus || 'Pending',
+        submittedBy: item.submittedBy || undefined,
+        submittedByRole: item.submittedByRole || undefined,
+        approvedBy: item.approvedBy || undefined,
         updatedAt: new Date(item.updatedAt || Date.now()),
         updatedBy: req.user!.uid,
       };
@@ -451,6 +475,10 @@ app.post("/api/sync/push", requireAuth, async (req: AuthRequest, res) => {
       reached: r.reached,
       confidence: r.confidence as 'High' | 'Medium' | 'Low',
       source: r.source,
+      approvalStatus: r.approvalStatus as 'Pending' | 'Approved' | 'Rejected' | undefined,
+      submittedBy: r.submittedBy || undefined,
+      submittedByRole: r.submittedByRole || undefined,
+      approvedBy: r.approvedBy || undefined,
       updatedAt: r.updatedAt.toISOString(),
       updatedBy: r.updatedBy || undefined
     }));

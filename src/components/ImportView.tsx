@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RecordItem } from '../types';
+import { RecordItem, UserState } from '../types';
 import { Sparkles, Save, Check, AlertCircle, FilePlus } from 'lucide-react';
 
 const STATIC_THEMES = [
@@ -16,7 +16,7 @@ const STATIC_COUNTRIES = ["Benin", "Ghana", "Togo", "Cote d'Ivoire", "Senegal", 
 
 interface ImportViewProps {
   onSaveRecord: (record: RecordItem) => void;
-  user: { email: string } | null;
+  user: UserState | null;
 }
 
 export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
@@ -158,6 +158,10 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
       reached,
       confidence,
       source,
+      approvalStatus: user?.role === 'Admin' ? 'Approved' : 'Pending',
+      submittedBy: user?.name || user?.email || 'Field officer',
+      submittedByRole: user?.role || 'Field officer',
+      approvedBy: user?.role === 'Admin' ? (user?.name || user?.email) : undefined,
       updatedAt: new Date().toISOString(),
       updatedBy: user?.email || 'local-officer'
     };

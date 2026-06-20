@@ -10,6 +10,10 @@ export interface RecordItem {
   reached: number;
   confidence: 'High' | 'Medium' | 'Low';
   source: string;
+  approvalStatus?: 'Pending' | 'Approved' | 'Rejected';
+  submittedBy?: string;
+  submittedByRole?: string;
+  approvedBy?: string;
   updatedAt?: string;
   updatedBy?: string;
 }

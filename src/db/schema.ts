@@ -24,6 +24,10 @@ export const records = pgTable('records', {
   reached: integer('reached').notNull().default(0),
   confidence: text('confidence').notNull().default('Medium'), // 'High' | 'Medium' | 'Low'
   source: text('source').notNull(),
+  approvalStatus: text('approval_status').notNull().default('Pending'), // 'Pending' | 'Approved' | 'Rejected'
+  submittedBy: text('submitted_by'),
+  submittedByRole: text('submitted_by_role'),
+  approvedBy: text('approved_by'),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   updatedBy: text('updated_by').references(() => users.uid, { onDelete: 'set null' }),
 });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RecordItem } from '../types';
+import { RecordItem, UserState } from '../types';
 import { Edit2, Trash2, Check, X, PlusCircle, Database, Search } from 'lucide-react';
 
 const STATIC_THEMES = [
@@ -19,7 +19,7 @@ interface RecordsViewProps {
   onAddRecord: (record: RecordItem) => void;
   onUpdateRecord: (record: RecordItem) => void;
   onDeleteRecord: (id: string) => void;
-  user: { email: string } | null;
+  user: UserState | null;
 }
 
 export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDeleteRecord, user }: RecordsViewProps) {
@@ -57,7 +57,22 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
     setEditingId(null);
   };
 
+  const handleApprovalAction = (id: string, status: 'Approved' | 'Rejected') => {
+    const original = records.find((record) => record.id === id);
+    if (!original) return;
+
+    const updated: RecordItem = {
+      ...original,
+      approvalStatus: status,
+      approvedBy: status === 'Approved' ? (user?.name || user?.email || 'Administrator') : original.approvedBy,
+      updatedAt: new Date().toISOString(),
+      updatedBy: user?.email || original.updatedBy || 'system-admin'
+    };
+    onUpdateRecord(updated);
+  };
+
   const saveEditing = (id: string) => {
+    const original = records.find((r) => r.id === id);
     const updated: RecordItem = {
       id,
       partner: editPartner,
@@ -70,8 +85,12 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
       reached: editReached,
       confidence: editConfidence,
       source: editSource,
+      approvalStatus: original?.approvalStatus || 'Pending',
+      submittedBy: original?.submittedBy,
+      submittedByRole: original?.submittedByRole,
+      approvedBy: original?.approvedBy,
       updatedAt: new Date().toISOString(),
-      updatedBy: user?.email || 'local-analyst'
+      updatedBy: user?.email || original?.updatedBy || 'local-analyst'
     };
     onUpdateRecord(updated);
     setEditingId(null);
@@ -92,6 +111,10 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
       reached: 0,
       confidence: "Medium",
       source: "Manual entry",
+      approvalStatus: user?.role === 'Admin' ? 'Approved' : 'Pending',
+      submittedBy: user?.name || user?.email || 'Field officer',
+      submittedByRole: user?.role || 'Field officer',
+      approvedBy: user?.role === 'Admin' ? (user?.name || user?.email) : undefined,
       updatedAt: new Date().toISOString(),
       updatedBy: user?.email || 'local-analyst'
     };
@@ -161,6 +184,7 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
               <th className="py-4 px-4 w-96">INTERVENTION CHANGE EVIDENCE</th>
               <th className="py-4 px-3 text-right">PEOPLE REACHED</th>
               <th className="py-4 px-4 text-center">CONFIDENCE</th>
+              <th className="py-4 px-4 text-center">APPROVAL</th>
               <th className="py-4 px-5 text-right">CONTROLS</th>
             </tr>
           </thead>
@@ -298,6 +322,12 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
                       <span className="text-[10px] text-brand-grey block mt-1 font-mono font-bold truncate max-w-[170px]" title={item.source}>
                         SRC: {item.source}
                       </span>
+                      <span className="text-[10px] text-brand-grey block mt-1 font-mono">
+                        Submitted by: {item.submittedBy || 'Unknown'}
+                      </span>
+                      <span className="text-[9px] text-[#5f776e] block uppercase tracking-wider mt-0.5 font-semibold">
+                        {item.submittedByRole || 'Field officer'}
+                      </span>
                     </td>
 
                     {/* Location scope */}
@@ -341,9 +371,39 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
                       </span>
                     </td>
 
+                    <td className="py-4 px-4 text-center vertical-top">
+                      <span className={`inline-block text-[9px] px-2 py-0.5 rounded-full font-extrabold border uppercase tracking-wider shadow-sm ${
+                        item.approvalStatus === 'Approved' 
+                          ? 'bg-brand-emerald/10 text-brand-emerald border-brand-emerald/25' 
+                          : item.approvalStatus === 'Rejected' 
+                            ? 'bg-rose-100 text-rose-700 border-rose-200' 
+                            : 'bg-[#F59E0B]/10 text-[#92400E] border-[#F59E0B]/30'
+                      }`}>
+                        {item.approvalStatus || 'Pending'}
+                      </span>
+                    </td>
+
                     {/* Standard edit deletes triggers */}
                     <td className="py-4 px-5 text-right vertical-top">
-                      <div className="flex justify-end gap-1.5">
+                      <div className="flex justify-end gap-1.5 flex-wrap">
+                        {user?.role === 'Admin' && item.approvalStatus === 'Pending' && (
+                          <>
+                            <button
+                              onClick={() => handleApprovalAction(item.id, 'Approved')}
+                              className="px-2 py-1 rounded-xl bg-brand-emerald text-white text-[10px] font-bold hover:bg-brand-emerald/90 transition-all"
+                              title="Approve this record"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleApprovalAction(item.id, 'Rejected')}
+                              className="px-2 py-1 rounded-xl bg-rose-100 text-rose-700 text-[10px] font-bold hover:bg-rose-200 transition-all"
+                              title="Reject this record"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
                         <button
                           onClick={() => startEditing(item)}
                           className="hover:bg-brand-bg border border-transparent hover:border-brand-border px-2 py-1 rounded-xl text-brand-grey hover:text-brand-emerald transition-all cursor-pointer"
