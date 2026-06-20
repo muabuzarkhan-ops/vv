@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-dark: #0F2C27;
+  --color-brand-emerald: #28A078;
+  --color-brand-bg: #F5F7F4;
+  --color-brand-border: #E1E8E4;
+  --color-brand-grey: #60706B;
+}
+
+/* Custom micro-interactions and scrollbars for modern dashboard fidelity */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E1E8E4;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #28A078;
+}
+
+body {
+  background-color: var(--color-brand-bg);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}

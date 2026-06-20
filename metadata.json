@@ -1,0 +1,6 @@
+{
+  "name": "Anesvad Results Hub",
+  "description": "Neglected Tropical Disease (NTD) intervention intelligence portal for tracking West African project results, change evidence, and partner contributions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
