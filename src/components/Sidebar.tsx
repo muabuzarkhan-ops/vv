@@ -35,8 +35,7 @@ export default function Sidebar({ activeView, onViewChange, user, pendingSyncCou
           <div className="absolute top-1/2 left-1/2 w-4 h-4 rounded-full bg-[#f0c24d] -translate-x-[20%] -translate-y-[80%] opacity-80" />
         </div>
         <div>
-          <h1 className="font-sans font-bold text-sm leading-tight tracking-tight text-white uppercase">Anesvad Hub</h1>
-          <span className="text-[10px] text-brand-emerald font-semibold tracking-wider block mt-0.5 uppercase">NTD Intelligence Hub</span>
+          <h1 className="font-sans font-bold text-sm leading-tight tracking-tight text-white uppercase">ANESVAD (NTDs)</h1>
         </div>
       </div>
 
