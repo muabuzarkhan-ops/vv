@@ -69,10 +69,21 @@ export default function Sidebar({ activeView, onViewChange, user, pendingSyncCou
       {/* User profile footer label */}
       <div className="mt-auto p-4 hidden lg:flex flex-col gap-3.5 border-t border-[#153630]">
         {user ? (
-          <div className="bg-brand-emerald/10 p-3.5 rounded-xl border border-brand-emerald/20 flex flex-col gap-1 text-xs">
-            <span className="text-brand-emerald font-extrabold tracking-wider text-[9px] uppercase">SIGNED OPERATOR</span>
-            <span className="text-white font-bold overflow-hidden text-ellipsis whitespace-nowrap text-xs">{user.name}</span>
-            <span className="text-[#a1beba] overflow-hidden text-ellipsis whitespace-nowrap uppercase text-[10px] font-mono mt-0.5">{user.role} • {user.org}</span>
+          <div className="bg-brand-emerald/10 p-3.5 rounded-xl border border-brand-emerald/20 flex flex-col gap-3 text-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-[10px] font-black text-white uppercase tracking-[0.2em]">
+                AF
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase text-brand-emerald/80 tracking-[0.2em]">Anesvad</span>
+                <span className="text-[10px] uppercase text-white font-bold tracking-[0.2em]">Foundation</span>
+              </div>
+            </div>
+            <div className="bg-brand-emerald/10 p-3.5 rounded-xl border border-brand-emerald/20 flex flex-col gap-1 text-xs">
+              <span className="text-brand-emerald font-extrabold tracking-wider text-[9px] uppercase">SIGNED OPERATOR</span>
+              <span className="text-white font-bold overflow-hidden text-ellipsis whitespace-nowrap text-xs">{user.name}</span>
+              <span className="text-[#a1beba] overflow-hidden text-ellipsis whitespace-nowrap uppercase text-[10px] font-mono mt-0.5">{user.role} • {user.org}</span>
+            </div>
           </div>
         ) : (
           <div className="bg-[#1a3832]/30 p-3.5 rounded-xl border border-[#234b43]/35 flex flex-col gap-1 text-xs text-[#a2bcc0]">
