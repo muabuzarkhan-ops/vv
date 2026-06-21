@@ -39,6 +39,7 @@ export default function DocumentsView({ documents, onUploadDocument, onDeleteDoc
             country: String(row.country || "Benin"),
             region: String(row.region || row.district || row.location || "Unspecified"),
             theme: String(row.theme || "Case detection"),
+            resultType: String(row.resultType || row.outcome || row.category || row.result_category || "Service delivery") as any,
             level: String(row.level || "District"),
             disease: String(row.disease || "Buruli ulcer"),
             evidence: String(row.evidence || row.result || row.description || "Decoded result evidence"),
@@ -74,6 +75,7 @@ export default function DocumentsView({ documents, onUploadDocument, onDeleteDoc
               const reachedVal = Number(getCol(['reached', 'reached_count', 'beneficiaries', 'peoplereached', 'count'])) || 0;
               const confidenceVal = getCol(['confidence', 'evidence_quality', 'data_reliability']) || 'Medium';
               const evidenceVal = getCol(['evidence', 'result', 'narrative', 'outcome', 'change']) || line;
+              const resultTypeVal = getCol(['resultType', 'outcome', 'category', 'result_category']) || 'Service delivery';
 
               return {
                 id: `record-csv-${Date.now()}-${idx}`,
@@ -81,6 +83,7 @@ export default function DocumentsView({ documents, onUploadDocument, onDeleteDoc
                 country: countryVal,
                 region: regionVal,
                 theme: themeVal,
+                resultType: resultTypeVal as any,
                 level: levelVal,
                 disease: diseaseVal,
                 evidence: evidenceVal,
@@ -102,6 +105,7 @@ export default function DocumentsView({ documents, onUploadDocument, onDeleteDoc
                 country: line.toLowerCase().includes("ghana") ? "Ghana" : line.toLowerCase().includes("togo") ? "Togo" : line.toLowerCase().includes("cote d'ivoire") ? "Cote d'Ivoire" : "Benin",
                 region: "Extract district",
                 theme: "Case detection",
+                resultType: line.toLowerCase().includes("policy") || line.toLowerCase().includes("governance") ? "Policy change" : line.toLowerCase().includes("training") || line.toLowerCase().includes("workshop") ? "Capacity building" : line.toLowerCase().includes("laboratory") || line.toLowerCase().includes("study") ? "Research output" : line.toLowerCase().includes("community") || line.toLowerCase().includes("awareness") ? "Community engagement" : "Service delivery",
                 level: "District",
                 disease: line.toLowerCase().includes("leprosy") ? "Leprosy" : "Buruli ulcer",
                 evidence: line.trim(),

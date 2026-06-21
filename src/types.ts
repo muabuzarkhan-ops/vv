@@ -7,6 +7,7 @@ export interface RecordItem {
   level: string;
   disease: string;
   evidence: string;
+  resultType: 'Policy change' | 'Service delivery' | 'Capacity building' | 'Research output' | 'Community engagement' | 'System strengthening';
   reached: number;
   confidence: 'High' | 'Medium' | 'Low';
   source: string;
@@ -34,6 +35,7 @@ export interface FilterState {
   country: string;
   level: string;
   disease: string;
+  resultType: string;
   search: string;
 }
 

@@ -26,6 +26,7 @@ export default function App() {
     country: 'All',
     level: 'All',
     disease: 'All',
+    resultType: 'All',
     search: ''
   });
 
@@ -302,22 +303,24 @@ export default function App() {
 
   // Filter computations for spreadsheet downloads
   const filteredRecordsForExport = records.filter(r => {
-    const haystack = `${r.partner} ${r.theme} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
+    const haystack = `${r.partner} ${r.theme} ${r.resultType} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
     const query = filters.search.toLowerCase();
     return (filters.theme === 'All' || r.theme === filters.theme)
       && (filters.country === 'All' || r.country === filters.country)
       && (filters.level === 'All' || r.level === filters.level)
       && (filters.disease === 'All' || r.disease === filters.disease)
+      && (filters.resultType === 'All' || r.resultType === filters.resultType)
       && haystack.includes(query);
   });
 
   // Client-Side CSV file exports
   const handleExportCSV = () => {
     try {
-      const csvHeaders = ["Project / Partner", "Theme Area", "Country Focus", "Region / Districts", "Operational Level", "Disease Focus", "Beneficiaries Reached", "Data Confidence", "Verifiable Source", "Intervention Change Evidence"];
+      const csvHeaders = ["Project / Partner", "Theme Area", "Result Category", "Country Focus", "Region / Districts", "Operational Level", "Disease Focus", "Beneficiaries Reached", "Data Confidence", "Verifiable Source", "Intervention Change Evidence"];
       const csvRows = filteredRecordsForExport.map(r => [
         `"${(r.partner || '').replace(/"/g, '""')}"`,
         `"${(r.theme || '').replace(/"/g, '""')}"`,
+        `"${(r.resultType || '').replace(/"/g, '""')}"`,
         `"${(r.country || '').replace(/"/g, '""')}"`,
         `"${(r.region || '').replace(/"/g, '""')}"`,
         `"${(r.level || '').replace(/"/g, '""')}"`,

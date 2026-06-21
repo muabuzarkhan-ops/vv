@@ -39,6 +39,7 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
   const [reached, setReached] = useState<number>(0);
   const [confidence, setConfidence] = useState<'High' | 'Medium' | 'Low'>('Medium');
   const [source, setSource] = useState('Unstructured copy-paste');
+  const [resultType, setResultType] = useState<'Policy change' | 'Service delivery' | 'Capacity building' | 'Research output' | 'Community engagement' | 'System strengthening'>('Service delivery');
   const [evidence, setEvidence] = useState('');
 
   const [hasUnsavedExtraction, setHasUnsavedExtraction] = useState(false);
@@ -78,6 +79,7 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
       setReached(Number(res.reached) || 0);
       setConfidence(res.confidence === 'High' || res.confidence === 'Medium' || res.confidence === 'Low' ? res.confidence : 'Medium');
       setSource(res.source || 'AI Classified Pasted Text');
+      setResultType(res.resultType || 'Service delivery');
       setEvidence(res.evidence || inputText);
 
       setHasUnsavedExtraction(true);
@@ -115,6 +117,14 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
       else if (lower.includes('strengthen') || lower.includes('ministry') || lower.includes('system')) guessedTheme = 'Health system strengthening';
       else if (lower.includes('community') || lower.includes('peer') || lower.includes('educator')) guessedTheme = 'Community engagement';
 
+      // Guess result type
+      let guessedResultType: typeof resultType = 'Service delivery';
+      if (lower.includes('policy') || lower.includes('advocacy') || lower.includes('governance')) guessedResultType = 'Policy change';
+      else if (lower.includes('training') || lower.includes('capacity') || lower.includes('workshop')) guessedResultType = 'Capacity building';
+      else if (lower.includes('laboratory') || lower.includes('research') || lower.includes('study') || lower.includes('protocol')) guessedResultType = 'Research output';
+      else if (lower.includes('community') || lower.includes('outreach') || lower.includes('awareness') || lower.includes('stigma')) guessedResultType = 'Community engagement';
+      else if (lower.includes('form') || lower.includes('reporting') || lower.includes('reporting form') || lower.includes('system')) guessedResultType = 'System strengthening';
+
       // Guess reached
       const numMatch = inputText.match(/[\d,.]+(?=\s*(people|community|patients|health workers|participants|households))/i);
       const guessedReached = numMatch ? Number(numMatch[0].replace(/,/g, '')) : 0;
@@ -125,6 +135,7 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
       setTheme(guessedTheme);
       setLevel('District');
       setDisease(guessedDisease);
+      setResultType(guessedResultType);
       setReached(guessedReached);
       setConfidence('Medium');
       setSource('Heuristic Local Classifier Fallback');
@@ -150,6 +161,7 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
       id: `record-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       partner,
       theme,
+      resultType,
       country,
       region,
       level,
@@ -173,6 +185,7 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
     // Clear out form
     setPartner('');
     setRegion('');
+    setResultType('Service delivery');
     setReached(0);
     setEvidence('');
   };
@@ -295,6 +308,23 @@ export default function ImportView({ onSaveRecord, user }: ImportViewProps) {
               className="w-full text-xs font-bold text-brand-dark border border-brand-border rounded-xl p-3 bg-white outline-none cursor-pointer focus:border-brand-emerald transition-all"
             >
               {STATIC_THEMES.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+
+          {/* Result Type */}
+          <div>
+            <label className="block text-[10px] font-extrabold text-brand-grey uppercase tracking-wider mb-1.5 font-mono">RESULT CATEGORY</label>
+            <select
+              value={resultType}
+              onChange={(e) => { setResultType(e.target.value as any); setHasUnsavedExtraction(true); }}
+              className="w-full text-xs font-bold text-brand-dark border border-brand-border rounded-xl p-3 bg-white outline-none cursor-pointer focus:border-brand-emerald transition-all"
+            >
+              <option value="Policy change">Policy change</option>
+              <option value="Service delivery">Service delivery</option>
+              <option value="Capacity building">Capacity building</option>
+              <option value="Research output">Research output</option>
+              <option value="Community engagement">Community engagement</option>
+              <option value="System strengthening">System strengthening</option>
             </select>
           </div>
 

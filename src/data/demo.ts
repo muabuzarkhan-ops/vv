@@ -13,6 +13,15 @@ export const LEVELS = ["Community", "District", "Subnational", "National", "Regi
 
 export const DISEASES = ["Buruli ulcer", "Leprosy", "Yaws", "Lymphatic filariasis", "Multiple skin NTDs"];
 
+export const RESULT_TYPES = [
+  "Policy change",
+  "Service delivery",
+  "Capacity building",
+  "Research output",
+  "Community engagement",
+  "System strengthening"
+];
+
 export const COUNTRIES = [
   "Benin",
   "Ghana",
@@ -32,6 +41,7 @@ export const DEMO_RECORDS: RecordItem[] = [
     level: "District",
     disease: "Buruli ulcer",
     evidence: "Health workers trained on early detection and referral pathways updated across two departments.",
+    resultType: "Capacity building",
     reached: 3450,
     confidence: "High",
     source: "Partner quarterly report",
@@ -47,6 +57,7 @@ export const DEMO_RECORDS: RecordItem[] = [
     level: "National",
     disease: "Multiple skin NTDs",
     evidence: "Skin NTD indicators incorporated into the national neglected tropical disease review process.",
+    resultType: "Policy change",
     reached: 0,
     confidence: "Medium",
     source: "Workshop minutes",
@@ -62,6 +73,7 @@ export const DEMO_RECORDS: RecordItem[] = [
     level: "Subnational",
     disease: "Leprosy",
     evidence: "Community organisations adopted a shared results template and began monthly referral reporting.",
+    resultType: "Service delivery",
     reached: 980,
     confidence: "Medium",
     source: "Excel tracker",
@@ -77,6 +89,7 @@ export const DEMO_RECORDS: RecordItem[] = [
     level: "National",
     disease: "Yaws",
     evidence: "Laboratory protocol harmonised for sample handling, reducing incomplete diagnostic forms.",
+    resultType: "Research output",
     reached: 0,
     confidence: "High",
     source: "Technical report",
@@ -92,6 +105,7 @@ export const DEMO_RECORDS: RecordItem[] = [
     level: "Community",
     disease: "Multiple skin NTDs",
     evidence: "Peer educators held stigma reduction sessions and increased acceptance of referral visits.",
+    resultType: "Community engagement",
     reached: 2120,
     confidence: "High",
     source: "Field narrative",
@@ -107,6 +121,7 @@ export const DEMO_RECORDS: RecordItem[] = [
     level: "Subnational",
     disease: "Lymphatic filariasis",
     evidence: "County teams started using a single reporting form for morbidity management follow-up.",
+    resultType: "System strengthening",
     reached: 760,
     confidence: "Low",
     source: "Word report",

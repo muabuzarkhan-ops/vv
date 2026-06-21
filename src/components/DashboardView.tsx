@@ -13,6 +13,7 @@ const STATIC_THEMES = [
 ];
 const STATIC_LEVELS = ["Community", "District", "Subnational", "National", "Regional"];
 const STATIC_DISEASES = ["Buruli ulcer", "Leprosy", "Yaws", "Lymphatic filariasis", "Multiple skin NTDs"];
+const STATIC_RESULT_TYPES = ["Policy change", "Service delivery", "Capacity building", "Research output", "Community engagement", "System strengthening"];
 const STATIC_COUNTRIES = ["Benin", "Ghana", "Togo", "Cote d'Ivoire", "Senegal", "Liberia"];
 
 interface DashboardViewProps {
@@ -24,12 +25,13 @@ interface DashboardViewProps {
 export default function DashboardView({ records, filters, onFilterChange }: DashboardViewProps) {
   // Compute aggregated KPIs
   const filtered = records.filter(r => {
-    const haystack = `${r.partner} ${r.theme} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
+    const haystack = `${r.partner} ${r.theme} ${r.resultType} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
     const query = filters.search.toLowerCase();
     return (filters.theme === 'All' || r.theme === filters.theme)
       && (filters.country === 'All' || r.country === filters.country)
       && (filters.level === 'All' || r.level === filters.level)
       && (filters.disease === 'All' || r.disease === filters.disease)
+      && (filters.resultType === 'All' || r.resultType === filters.resultType)
       && haystack.includes(query);
   });
 
@@ -60,6 +62,7 @@ export default function DashboardView({ records, filters, onFilterChange }: Dash
       country: 'All',
       level: 'All',
       disease: 'All',
+      resultType: 'All',
       search: ''
     });
   };
@@ -167,6 +170,19 @@ export default function DashboardView({ records, filters, onFilterChange }: Dash
             >
               <option value="All">All Diseases</option>
               {STATIC_DISEASES.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+
+          {/* Result category selection */}
+          <div>
+            <label className="block text-[10px] font-extrabold text-brand-grey uppercase tracking-widest mb-1.5 font-mono">RESULT CATEGORY</label>
+            <select
+              value={filters.resultType}
+              onChange={(e) => onFilterChange({ ...filters, resultType: e.target.value })}
+              className="w-full text-xs font-bold text-brand-dark border border-brand-border rounded-xl p-2.5 bg-white outline-none focus:border-brand-emerald transition-all cursor-pointer"
+            >
+              <option value="All">All Result Categories</option>
+              {STATIC_RESULT_TYPES.map((rt) => <option key={rt} value={rt}>{rt}</option>)}
             </select>
           </div>
         </div>

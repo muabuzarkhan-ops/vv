@@ -13,6 +13,7 @@ const STATIC_THEMES = [
 const STATIC_LEVELS = ["Community", "District", "Subnational", "National", "Regional"];
 const STATIC_DISEASES = ["Buruli ulcer", "Leprosy", "Yaws", "Lymphatic filariasis", "Multiple skin NTDs"];
 const STATIC_COUNTRIES = ["Benin", "Ghana", "Togo", "Cote d'Ivoire", "Senegal", "Liberia"];
+const STATIC_RESULT_TYPES = ["Policy change", "Service delivery", "Capacity building", "Research output", "Community engagement", "System strengthening"];
 
 interface RecordsViewProps {
   records: RecordItem[];
@@ -33,6 +34,7 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
   const [editTheme, setEditTheme] = useState('Case detection');
   const [editLevel, setEditLevel] = useState('District');
   const [editDisease, setEditDisease] = useState('Buruli ulcer');
+  const [editResultType, setEditResultType] = useState<'Policy change' | 'Service delivery' | 'Capacity building' | 'Research output' | 'Community engagement' | 'System strengthening'>('Service delivery');
   const [editEvidence, setEditEvidence] = useState('');
   const [editReached, setEditReached] = useState(0);
   const [editConfidence, setEditConfidence] = useState<'High' | 'Medium' | 'Low'>('Medium');
@@ -45,6 +47,7 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
     setEditCountry(record.country);
     setEditRegion(record.region);
     setEditTheme(record.theme);
+    setEditResultType(record.resultType);
     setEditLevel(record.level);
     setEditDisease(record.disease);
     setEditEvidence(record.evidence);
@@ -79,6 +82,7 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
       country: editCountry,
       region: editRegion,
       theme: editTheme,
+      resultType: editResultType,
       level: editLevel,
       disease: editDisease,
       evidence: editEvidence,
@@ -107,6 +111,7 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
       theme: "Case detection",
       level: "District",
       disease: "Buruli ulcer",
+      resultType: "Service delivery",
       evidence: "Describe intervention results and change narratives here...",
       reached: 0,
       confidence: "Medium",
@@ -125,7 +130,7 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
 
   // Filter local rows
   const filtered = records.filter(r => {
-    const haystack = `${r.partner} ${r.theme} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
+    const haystack = `${r.partner} ${r.theme} ${r.resultType} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
     return haystack.includes(searchTerm.toLowerCase());
   });
 
@@ -181,6 +186,7 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
               <th className="py-4 px-5">PARTNER / SOURCE</th>
               <th className="py-4 px-3">COUNTRY / SCOPE</th>
               <th className="py-4 px-3">TAXONOMY AREA</th>
+              <th className="py-4 px-3">RESULT CATEGORY</th>
               <th className="py-4 px-4 w-96">INTERVENTION CHANGE EVIDENCE</th>
               <th className="py-4 px-3 text-right">PEOPLE REACHED</th>
               <th className="py-4 px-4 text-center">CONFIDENCE</th>
@@ -240,6 +246,13 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
                           className="w-full border border-brand-border rounded-lg p-2 mb-1.5 text-[10px] font-bold text-brand-dark bg-white focus:border-brand-emerald outline-none cursor-pointer"
                         >
                           {STATIC_THEMES.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                        <select
+                          value={editResultType}
+                          onChange={(e) => setEditResultType(e.target.value as any)}
+                          className="w-full border border-brand-border rounded-lg p-2 mb-1.5 text-[10px] font-bold text-brand-dark bg-white focus:border-brand-emerald outline-none cursor-pointer"
+                        >
+                          {STATIC_RESULT_TYPES.map(rt => <option key={rt} value={rt}>{rt}</option>)}
                         </select>
                         <select
                           value={editDisease}
@@ -323,6 +336,9 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
                         SRC: {item.source}
                       </span>
                       <span className="text-[10px] text-brand-grey block mt-1 font-mono">
+                        {item.resultType}
+                      </span>
+                      <span className="text-[10px] text-brand-grey block mt-1 font-mono">
                         Submitted by: {item.submittedBy || 'Unknown'}
                       </span>
                       <span className="text-[9px] text-[#5f776e] block uppercase tracking-wider mt-0.5 font-semibold">
@@ -346,8 +362,11 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
                       <span className={`inline-block border text-[10px] px-1.5 py-0.5 rounded font-bold leading-none mt-0.5 ${getDiseaseBadgeColor(item.disease)}`}>
                         {item.disease}
                       </span>
+                    </td>                    <td className="py-4 px-3 vertical-top">
+                      <span className="inline-block bg-brand-bg border border-brand-border text-brand-dark text-[10px] px-2.5 py-0.5 rounded-lg font-bold uppercase tracking-wide">
+                        {item.resultType}
+                      </span>
                     </td>
-
                     {/* Free comments/evidence */}
                     <td className="py-4 px-4 w-96 leading-relaxed vertical-top text-brand-dark/95">
                       <p className="font-sans font-normal antialiased">{item.evidence}</p>
