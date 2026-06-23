@@ -35,10 +35,14 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editRecord, setEditRecord] = useState<RecordItem | null>(null);
 
+    const pendingFieldworkerRecords = useMemo(() => {
+    return records.filter((record) => record.approvalStatus !== 'Approved' || record.submittedByRole !== 'Admin');
+  }, [records]);
+
   const filteredRecords = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();
     return records.filter((record) => {
-      const haystack = `${record.partner} ${record.country} ${record.region} ${record.theme} ${record.level} ${record.disease} ${record.resultType} ${record.evidence} ${record.source}`.toLowerCase();
+      const haystack = `${record.partner} ${record.country} ${record.region} ${record.theme} ${record.level} ${record.disease} ${record.resultType} ${record.evidence} ${record.source} ${record.submittedBy || ''} ${record.submittedByRole || ''}`.toLowerCase();
       return haystack.includes(lowerSearch);
     });
   }, [records, searchTerm]);
@@ -97,12 +101,14 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
     setEditRecord((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
+  const pendingFieldworkerRecords = records.filter((record) => record.approvalStatus !== 'Approved' || record.submittedByRole !== 'Admin');
+
   if (!user || user.role !== 'Admin') {
     return (
-      <div className="bg-white rounded-3xl border border-brand-border shadow-sm p-8 max-w-4xl mx-auto">
+      <div className="bg-white rounded-3xl border border-brand-border shadow-sm p-8 max-w-5xl mx-auto space-y-6">
         <div className="mb-6 text-center">
           <h3 className="text-lg font-bold text-brand-dark">Admin Console Access</h3>
-          <p className="text-sm text-brand-grey mt-2">Login with admin credentials to manage records and perform bulk deletes.</p>
+          <p className="text-sm text-brand-grey mt-2">Login with admin credentials to manage records and perform bulk deletes. Pending field worker submissions are visible below for review.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -139,6 +145,44 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
           {loginFeedback && (
             <div className={`rounded-2xl p-4 text-xs font-semibold ${loginFeedback.type === 'success' ? 'bg-[#e6f8ef] text-[#14533d] border border-[#b9e3d3]' : 'bg-[#fee2e2] text-[#991b1b] border border-[#fca5a5]'}`}>
               {loginFeedback.msg}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-3xl border border-brand-border bg-brand-bg/70 p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <div className="text-sm font-bold text-brand-dark">Pending field worker submissions</div>
+              <div className="text-xs text-brand-grey">These items are awaiting admin approval and can be managed after login.</div>
+            </div>
+            <div className="rounded-full border border-brand-emerald/30 bg-brand-emerald/10 px-3 py-1 text-[11px] font-bold text-brand-emerald">{pendingFieldworkerRecords.length} pending</div>
+          </div>
+          {pendingFieldworkerRecords.length === 0 ? (
+            <div className="text-sm text-brand-grey">No pending field worker submissions currently available.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-[11px] border-collapse">
+                <thead>
+                  <tr className="text-brand-grey uppercase tracking-[0.2em] font-semibold text-[10px] border-b border-brand-border/70">
+                    <th className="py-3 pr-3">Partner</th>
+                    <th className="py-3 pr-3">Country</th>
+                    <th className="py-3 pr-3">Approval</th>
+                    <th className="py-3 pr-3">Submitted by</th>
+                    <th className="py-3">Role</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingFieldworkerRecords.slice(0, 6).map((record) => (
+                    <tr key={record.id} className="border-b border-brand-border/50 last:border-0">
+                      <td className="py-3 pr-3 text-sm text-brand-dark">{record.partner}</td>
+                      <td className="py-3 pr-3 text-sm text-brand-dark">{record.country}</td>
+                      <td className="py-3 pr-3 text-sm text-brand-dark">{record.approvalStatus || 'Pending'}</td>
+                      <td className="py-3 pr-3 text-sm text-brand-dark">{record.submittedBy || 'Field worker'}</td>
+                      <td className="py-3 text-sm text-brand-dark">{record.submittedByRole || 'Field worker'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
