@@ -11,6 +11,7 @@ import RecordsView from './components/RecordsView';
 import InsightsView from './components/InsightsView';
 import SyncView from './components/SyncView';
 import AdminView from './components/AdminView';
+import FieldWorkerView from './components/fieldworkers/FieldWorkerView';
 
 // Standard Lucide icons
 import { Cloud, Wifi, WifiOff, FileSpreadsheet, Download, RefreshCw, AlertCircle, Database, Check } from 'lucide-react';
@@ -451,6 +452,14 @@ export default function App() {
         );
       case 'insights':
         return <InsightsView records={records} />;
+      case 'fieldworker':
+        return (
+          <FieldWorkerView
+            records={records}
+            user={user}
+            onSaveRecord={handleAddRecord}
+          />
+        );
       case 'sync':
         return (
           <SyncView
@@ -501,6 +510,7 @@ export default function App() {
                  activeView === 'import' ? 'Classify Raw Reports' :
                  activeView === 'documents' ? 'Documents Archive' :
                  activeView === 'records' ? 'Structured Database' :
+                 activeView === 'fieldworker' ? 'Field Worker Portal' :
                  activeView === 'insights' ? 'Diagnostic Insights AI' :
                  'Federated Sync Config'}
               </h2>
@@ -514,6 +524,7 @@ export default function App() {
                activeView === 'import' ? 'Map unstructured dispatches, Excel transcripts and narratives into taxonomy fields.' :
                activeView === 'documents' ? 'Archiving original partner manifests, CSV directories and file logs.' :
                activeView === 'records' ? 'Manage detailed data rows, modify values, and add or delete metrics.' :
+               activeView === 'fieldworker' ? 'Field workers can register submissions by country and upload file-based evidence.' :
                activeView === 'insights' ? 'AI evaluation of gaps, data verification indices, and operational next steps.' :
                'Configure connections, login credentials, and synchronize caches.'}
             </p>
