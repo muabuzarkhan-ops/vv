@@ -101,6 +101,11 @@ export default function App() {
     }
   };
 
+  const handleRefreshData = async () => {
+    triggerNotification('info', 'Refreshing data now...');
+    await fetchRecordsOnMount();
+  };
+
   // Save specific states to disk
   const saveDocumentsToCache = (docs: DocumentItem[]) => {
     setDocuments(docs);
@@ -547,6 +552,15 @@ export default function App() {
             >
               <Download className="w-3.5 h-3.5 text-orange-500" />
               Export JSON
+            </button>
+
+            <button
+              onClick={handleRefreshData}
+              className="text-[11px] font-bold text-brand-dark hover:text-brand-dark px-3.5 py-2 bg-white hover:bg-brand-bg/50 border border-brand-border rounded-xl flex items-center gap-2 transition-all duration-150 shadow-sm hover:shadow cursor-pointer"
+              title="Refresh record data from server or cache"
+            >
+              <Cloud className="w-3.5 h-3.5 text-brand-emerald" />
+              Refresh Data
             </button>
 
             {/* Sync trigger shortcuts */}
