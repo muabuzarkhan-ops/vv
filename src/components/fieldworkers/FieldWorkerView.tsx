@@ -17,7 +17,7 @@ export default function FieldWorkerView({ records, user, onSaveRecord }: FieldWo
   const [workerId, setWorkerId] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<{ id: string; name: string; country: string } | null>(null);
+  const [profile, setProfile] = useState<{ id: string; name: string; country: string; role: string } | null>(null);
   const [inputText, setInputText] = useState('');
   const [partner, setPartner] = useState('');
   const [region, setRegion] = useState('');
@@ -51,10 +51,10 @@ export default function FieldWorkerView({ records, user, onSaveRecord }: FieldWo
       return;
     }
 
-    setProfile({ id: worker.id, name: worker.name, country });
+    setProfile({ id: worker.id, name: worker.name, country, role: worker.role });
     setStep('work');
     setLoginError(null);
-    setMessage(`Welcome ${worker.name}. Your submissions for ${country} are pending admin approval.`);
+    setMessage(`Welcome ${worker.name} (${worker.role}). Your submissions for ${country} are pending admin approval.`);
   };
 
   const handleSave = () => {
@@ -79,7 +79,7 @@ export default function FieldWorkerView({ records, user, onSaveRecord }: FieldWo
       resultType,
       approvalStatus: 'Pending',
       submittedBy: profile.name,
-      submittedByRole: 'Field worker',
+      submittedByRole: profile.role,
       updatedAt: new Date().toISOString(),
       updatedBy: profile.id
     };
@@ -188,7 +188,8 @@ export default function FieldWorkerView({ records, user, onSaveRecord }: FieldWo
               <p className="text-sm text-brand-grey mt-2">Your records will remain pending until an admin approves them.</p>
             </div>
             <div className="rounded-2xl bg-brand-bg/70 px-4 py-3 text-sm text-brand-dark border border-brand-border">
-              Country: <strong>{profile.country}</strong>
+              <div>Country: <strong>{profile.country}</strong></div>
+              <div>Role: <strong>{profile.role}</strong></div>
             </div>
           </div>
 
