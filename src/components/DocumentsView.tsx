@@ -1,22 +1,18 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { DocumentItem, RecordItem, UserState } from '../types';
+import React, { useState, useRef } from 'react';
+import { DocumentItem, RecordItem } from '../types';
 import { UploadCloud, FileText, CheckCircle, AlertTriangle, FileSpreadsheet, Trash2, Calendar } from 'lucide-react';
 
 interface DocumentsViewProps {
   documents: DocumentItem[];
-  user: UserState | null;
   onUploadDocument: (doc: DocumentItem, extractedRecords: RecordItem[]) => void;
   onDeleteDocument: (id: string) => void;
 }
 
-export default function DocumentsView({ documents, user, onUploadDocument, onDeleteDocument }: DocumentsViewProps) {
+export default function DocumentsView({ documents, onUploadDocument, onDeleteDocument }: DocumentsViewProps) {
   const [dragActive, setDragActive] = useState(false);
   const [sourceLabel, setSourceLabel] = useState('');
   const [parseStatus, setParseStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [parseFeedback, setParseFeedback] = useState('');
-  const [requiredPassword, setRequiredPassword] = useState('');
-  const [accessGranted, setAccessGranted] = useState(user?.role === 'Admin');
-  const [authError, setAuthError] = useState<string | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -178,46 +174,6 @@ export default function DocumentsView({ documents, user, onUploadDocument, onDel
   const onButtonClick = () => {
     fileInputRef.current?.click();
   };
-
-  const handleAdminUnlock = () => {
-    if (requiredPassword === '11223344') {
-      setAccessGranted(true);
-      setAuthError(null);
-    } else {
-      setAuthError('Invalid admin password.');
-    }
-  };
-
-  React.useEffect(() => {
-    if (user?.role === 'Admin') {
-      setAccessGranted(true);
-    }
-  }, [user]);
-
-  if (!accessGranted) {
-    return (
-      <div className="bg-white rounded-3xl border border-brand-border shadow-sm p-8 max-w-3xl mx-auto text-center">
-        <h3 className="text-lg font-bold text-brand-dark mb-3">Admin access required</h3>
-        <p className="text-sm text-brand-grey mb-6">Please enter the admin password to access Documents.</p>
-        <div className="max-w-md mx-auto space-y-4">
-          <input
-            type="password"
-            value={requiredPassword}
-            onChange={(e) => setRequiredPassword(e.target.value)}
-            placeholder="Admin password"
-            className="w-full rounded-2xl border border-brand-border bg-brand-bg/60 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
-          />
-          <button
-            onClick={handleAdminUnlock}
-            className="w-full rounded-2xl bg-brand-emerald px-5 py-3 text-sm font-bold text-white hover:bg-brand-emerald/90 transition"
-          >
-            Unlock Documents
-          </button>
-          {authError && <div className="text-sm text-rose-600">{authError}</div>}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
