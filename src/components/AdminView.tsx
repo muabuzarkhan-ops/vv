@@ -77,6 +77,10 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
     setLoading(false);
   };
 
+  const handleWorkerSelectionChange = (value: string) => {
+    setSelectedWorkerId(value);
+  };
+
   const toggleSelect = (id: string) => {
     setSelectedIds((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
@@ -123,8 +127,28 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
     setEditRecord((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
+  const handleWorkerLogin = () => {
+    const worker = FIELD_WORKERS.find((w) => w.id === selectedWorkerId && w.password === workerPassword);
+    if (!worker) {
+      setWorkerLoginError('Invalid worker ID or password.');
+      setWorkerProfile(null);
+      return;
+    }
+    if (worker.country !== workerCountry) {
+      setWorkerLoginError(`Worker ID ${worker.id} is assigned to ${worker.country}. Select the correct country first.`);
+      setWorkerProfile(null);
+      return;
+    }
+    setWorkerLoginError(null);
+    setWorkerProfile({ id: worker.id, name: worker.name, role: worker.role, country: worker.country });
+    setFieldSubmitMessage(`Worker ${worker.name} (${worker.role}) authenticated for ${worker.country}. Submit data pending admin approval.`);
+  };
+
   const handleFieldWorkerRecordSave = () => {
-    if (!selectedWorker) return;
+    if (!workerProfile) {
+      setFieldSubmitMessage('Please authenticate a field worker before submitting data.');
+      return;
+    }
     if (!fieldPartner.trim() || !fieldEvidence.trim()) {
       setFieldSubmitMessage('Please fill in partner and evidence before saving.');
       return;
@@ -147,7 +171,7 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
       submittedBy: selectedWorker.name,
       submittedByRole: selectedWorker.role,
       updatedAt: new Date().toISOString(),
-      updatedBy: selectedWorker.id
+      updatedBy: workerProfile.id
     };
 
     onAddRecord(newRecord);
@@ -280,6 +304,193 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
           </button>
           <div className="rounded-2xl bg-brand-bg/70 px-4 py-2 text-xs text-brand-grey">Logged in as {user.name}</div>
         </div>
+      </div>
+
+      <div className="bg-brand-bg/70 border border-brand-border rounded-3xl p-5 mb-6">
+        <div className="flex flex-col xl:flex-row gap-4 xl:items-end justify-between">
+          <div>
+            <h4 className="font-semibold text-brand-dark">Fieldworker / Data Collector Submission</h4>
+            <p className="text-sm text-brand-grey mt-1">Select a country, sign in with worker credentials, then submit data or upload a file. Records remain pending until approved.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 w-full xl:w-auto">
+            <div>
+              <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Country</label>
+              <select
+                value={workerCountry}
+                onChange={(e) => setWorkerCountry(e.target.value)}
+                className="w-full rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+              >
+                {['Benin', 'Ghana', 'Togo', 'Cote d\'Ivoire', 'Senegal', 'Liberia'].map((country) => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Worker ID</label>
+              <select
+                value={selectedWorkerId}
+                onChange={(e) => setSelectedWorkerId(e.target.value)}
+                className="w-full rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+              >
+                {currentWorkersByCountry.map((worker) => (
+                  <option key={worker.id} value={worker.id}>{`${worker.id} — ${worker.name}`}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Password</label>
+              <input
+                type="password"
+                value={workerPassword}
+                onChange={(e) => setWorkerPassword(e.target.value)}
+                placeholder="Enter password"
+                className="w-full rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={handleWorkerLogin}
+                className="w-full rounded-2xl bg-brand-emerald px-4 py-3 text-sm font-bold text-white hover:bg-brand-emerald/90 transition"
+              >
+                Authenticate worker
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {workerLoginError && (
+          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{workerLoginError}</div>
+        )}
+
+        {workerProfile && (
+          <div className="mt-6 rounded-3xl border border-brand-border bg-white p-5">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
+              <div>
+                <div className="text-sm font-semibold text-brand-dark">Signed in as {workerProfile.name}</div>
+                <div className="text-xs text-brand-grey">{workerProfile.role} • {workerProfile.country}</div>
+              </div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-brand-emerald font-bold bg-brand-emerald/10 rounded-full px-3 py-1">Pending approval</div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Partner / project</label>
+                <input
+                  type="text"
+                  value={fieldPartner}
+                  onChange={(e) => setFieldPartner(e.target.value)}
+                  className="w-full rounded-2xl border border-brand-border bg-brand-bg/50 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Region / district</label>
+                <input
+                  type="text"
+                  value={fieldRegion}
+                  onChange={(e) => setFieldRegion(e.target.value)}
+                  className="w-full rounded-2xl border border-brand-border bg-brand-bg/50 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Theme</label>
+                <select
+                  value={fieldTheme}
+                  onChange={(e) => setFieldTheme(e.target.value)}
+                  className="w-full rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                >
+                  {THEME_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Result type</label>
+                <select
+                  value={fieldResultType}
+                  onChange={(e) => setFieldResultType(e.target.value as any)}
+                  className="w-full rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                >
+                  {RESULT_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Disease focus</label>
+                <select
+                  value={fieldDisease}
+                  onChange={(e) => setFieldDisease(e.target.value)}
+                  className="w-full rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                >
+                  {DISEASE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Reached</label>
+                <input
+                  type="number"
+                  value={fieldReached}
+                  onChange={(e) => setFieldReached(Number(e.target.value))}
+                  className="w-full rounded-2xl border border-brand-border bg-brand-bg/50 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Confidence</label>
+                <select
+                  value={fieldConfidence}
+                  onChange={(e) => setFieldConfidence(e.target.value as any)}
+                  className="w-full rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                >
+                  {['High', 'Medium', 'Low'].map((level) => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Evidence summary</label>
+                <textarea
+                  value={fieldEvidence}
+                  onChange={(e) => setFieldEvidence(e.target.value)}
+                  rows={4}
+                  className="w-full rounded-2xl border border-brand-border bg-brand-bg/50 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-brand-grey mb-2">Upload file</label>
+                <input
+                  type="file"
+                  accept=".txt,.csv"
+                  onChange={handleFieldUploadFile}
+                  className="w-full text-sm text-brand-dark"
+                />
+              </div>
+            </div>
+
+            {fieldUploadPreview && (
+              <div className="rounded-2xl border border-brand-border bg-brand-bg/50 p-4 text-sm text-brand-dark overflow-hidden whitespace-pre-wrap max-h-40 overflow-y-auto">
+                <strong className="block mb-2">Uploaded preview</strong>
+                {fieldUploadPreview}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center mt-4">
+              <button
+                onClick={handleFieldWorkerRecordSave}
+                className="rounded-2xl bg-brand-emerald px-5 py-3 text-sm font-bold text-white hover:bg-brand-emerald/90 transition"
+              >
+                Save pending submission
+              </button>
+              {fieldSubmitMessage && (
+                <div className="text-sm text-brand-grey">{fieldSubmitMessage}</div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6 text-xs">
