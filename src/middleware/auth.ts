@@ -13,6 +13,7 @@ export interface AuthRequest extends Request {
     name: string;
     role: string;
     org: string;
+    isAdmin: boolean;
   };
 }
 
@@ -60,7 +61,14 @@ export const requireAuth = async (
       existingUser = rows[0];
     }
 
-    req.dbUser = existingUser;
+    req.dbUser = {
+      uid: existingUser.uid,
+      email: existingUser.email,
+      name: existingUser.name,
+      role: existingUser.role,
+      org: existingUser.org,
+      isAdmin: existingUser.role === 'Admin'
+    };
     next();
   } catch (error) {
     console.error('Error verifying Firebase ID token in Express middleware:', error);

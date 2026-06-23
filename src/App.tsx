@@ -242,20 +242,13 @@ export default function App() {
     }
 
     const approvedRecords = pendingChanges.filter((record) => record.approvalStatus === 'Approved');
-    let uploadRecords = approvedRecords;
+    const uploadRecords = approvedRecords;
 
     if (uploadRecords.length === 0) {
-      if (user?.role === 'Admin') {
-        uploadRecords = pendingChanges.map((record) => ({
-          ...record,
-          approvalStatus: 'Approved',
-          approvedBy: 'Anesvad',
-          updatedAt: new Date().toISOString(),
-          updatedBy: user.email || 'anesvad-admin'
-        }));
-      } else {
-        throw new Error("No approved records are ready for upload. Admin approval is required before syncing field submissions.");
+      if (pendingChanges.length > 0) {
+        throw new Error("No approved records are ready for upload. Please approve pending submissions in Admin or Records view before syncing.");
       }
+      return { added: 0, updated: 0 };
     }
 
     let responseData: { added: number; updated: number; records: RecordItem[] } | null = null;
@@ -474,6 +467,7 @@ export default function App() {
             onAdminLogin={handleAdminLogin}
             onLogout={handleLogout}
             pendingChangesCount={pendingChanges.length}
+            pendingRecords={pendingChanges}
             onTriggerSync={handleTriggerSync}
             onTriggerPull={handleTriggerPull}
             lastSyncedAt={lastSyncedAt}

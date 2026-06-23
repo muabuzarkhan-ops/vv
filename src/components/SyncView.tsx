@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserState } from '../types';
+import { RecordItem, UserState } from '../types';
 import { Wifi, WifiOff, Users, Server, RefreshCw, LogOut, CheckCircle, AlertTriangle } from 'lucide-react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleAuthProvider } from '../lib/firebase.ts';
@@ -10,6 +10,7 @@ interface SyncViewProps {
   onAdminLogin: (username: string, password: string) => Promise<{ success: boolean; message: string }>;
   onLogout: () => void;
   pendingChangesCount: number;
+  pendingRecords: RecordItem[];
   onTriggerSync: () => Promise<{ added: number; updated: number }>;
   onTriggerPull: () => Promise<void>;
   lastSyncedAt: string;
@@ -23,7 +24,8 @@ export default function SyncView({
   pendingChangesCount,
   onTriggerSync,
   onTriggerPull,
-  lastSyncedAt
+  lastSyncedAt,
+  pendingRecords
 }: SyncViewProps) {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
@@ -248,6 +250,33 @@ export default function SyncView({
                 </strong>
               </div>
             </div>
+
+            {user?.role === 'Admin' && pendingRecords.length > 0 && (
+              <div className="mt-4 rounded-2xl border border-brand-border bg-white p-4 text-xs text-brand-dark">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div>
+                    <div className="text-sm font-bold text-brand-dark">Pending field worker submissions</div>
+                    <div className="text-[11px] text-brand-grey">Admin review required before these records can be synced.</div>
+                  </div>
+                  <div className="rounded-full border border-brand-emerald/30 bg-brand-emerald/10 px-3 py-1 text-[11px] font-bold text-brand-emerald">{pendingRecords.length} pending</div>
+                </div>
+                <div className="space-y-3">
+                  {pendingRecords.slice(0, 4).map((record) => (
+                    <div key={record.id} className="rounded-2xl border border-brand-border/70 bg-brand-bg/70 p-3">
+                      <div className="text-sm font-semibold text-brand-dark">{record.partner}</div>
+                      <div className="text-[11px] text-brand-grey mt-1">{record.country} · {record.region} · {record.theme}</div>
+                      <div className="mt-2 text-[11px] text-brand-dark/80">Submitted by {record.submittedBy || 'Field worker'} ({record.submittedByRole || 'Field officer'})</div>
+                      <div className="mt-2 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-brand-emerald">
+                        <span className="rounded-full bg-brand-emerald/10 px-2 py-1 border border-brand-emerald/20">{record.approvalStatus || 'Pending'}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {pendingRecords.length > 4 && (
+                  <div className="mt-3 text-[11px] text-brand-grey">View more pending submissions in the Admin Console.</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
