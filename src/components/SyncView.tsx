@@ -201,10 +201,6 @@ export default function SyncView({
               {loading ? 'Verifying admin credentials...' : 'Login as Admin'}
             </button>
 
-            <div className="p-4 rounded-2xl bg-brand-bg/70 border border-brand-border text-xs text-brand-grey">
-              Enter the fixed admin credentials to approve and upload pending submissions.
-              <div className="mt-2 font-bold text-brand-dark text-[11px]">Username: Anesvad | Password: 11223344</div>
-            </div>
           </div>
         )}
       </div>

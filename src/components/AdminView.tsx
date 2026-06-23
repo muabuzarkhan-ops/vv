@@ -136,9 +136,6 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
           >
             {loading ? 'Verifying credentials...' : 'Login as Admin'}
           </button>
-          <div className="rounded-2xl bg-brand-bg/70 border border-brand-border p-4 text-xs text-brand-grey">
-            Use username <span className="font-semibold text-brand-dark">Anesvad</span> and password <span className="font-semibold text-brand-dark">11223344</span>.
-          </div>
           {loginFeedback && (
             <div className={`rounded-2xl p-4 text-xs font-semibold ${loginFeedback.type === 'success' ? 'bg-[#e6f8ef] text-[#14533d] border border-[#b9e3d3]' : 'bg-[#fee2e2] text-[#991b1b] border border-[#fca5a5]'}`}>
               {loginFeedback.msg}
