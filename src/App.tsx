@@ -10,6 +10,7 @@ import DocumentsView from './components/DocumentsView';
 import RecordsView from './components/RecordsView';
 import InsightsView from './components/InsightsView';
 import SyncView from './components/SyncView';
+import AdminView from './components/AdminView';
 
 // Standard Lucide icons
 import { Cloud, Wifi, WifiOff, FileSpreadsheet, Download, RefreshCw, AlertCircle, Database, Check } from 'lucide-react';
@@ -461,6 +462,17 @@ export default function App() {
             onTriggerSync={handleTriggerSync}
             onTriggerPull={handleTriggerPull}
             lastSyncedAt={lastSyncedAt}
+          />
+        );
+      case 'admin':
+        return (
+          <AdminView
+            records={records}
+            user={user}
+            onAdminLogin={handleAdminLogin}
+            onLogout={handleLogout}
+            onUpdateRecord={handleUpdateRecord}
+            onDeleteRecord={handleDeleteRecord}
           />
         );
       default:

@@ -5,7 +5,8 @@ import {
   FileUp, 
   Database, 
   Lightbulb, 
-  RefreshCw 
+  RefreshCw, 
+  Edit2 
 } from 'lucide-react';
 import { UserState } from '../types';
 
@@ -24,6 +25,7 @@ export default function Sidebar({ activeView, onViewChange, user, pendingSyncCou
     { id: 'records', label: 'Records db', icon: Database },
     { id: 'insights', label: 'Insights AI', icon: Lightbulb },
     { id: 'sync', label: 'Sync & Auth', icon: RefreshCw },
+    { id: 'admin', label: 'Admin Console', icon: Edit2 },
   ];
 
   return (
