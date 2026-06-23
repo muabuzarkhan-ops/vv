@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RecordItem, UserState } from '../types';
 import { Edit2, Trash2, Check, X, PlusCircle, Database, Search } from 'lucide-react';
 
@@ -26,6 +26,9 @@ interface RecordsViewProps {
 export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDeleteRecord, user }: RecordsViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [requiredPassword, setRequiredPassword] = useState('');
+  const [accessGranted, setAccessGranted] = useState(user?.role === 'Admin');
+  const [authError, setAuthError] = useState<string | null>(null);
 
   // States for the inline record editor
   const [editPartner, setEditPartner] = useState('');
@@ -127,7 +130,45 @@ export default function RecordsView({ records, onAddRecord, onUpdateRecord, onDe
     startEditing(newBlank);
   };
 
+  const handleAdminUnlock = () => {
+    if (requiredPassword === '11223344') {
+      setAccessGranted(true);
+      setAuthError(null);
+    } else {
+      setAuthError('Invalid admin password.');
+    }
+  };
+
   // Filter local rows
+  useEffect(() => {
+    if (user?.role === 'Admin') setAccessGranted(true);
+  }, [user]);
+
+  if (!accessGranted) {
+    return (
+      <div className="bg-white rounded-3xl border border-brand-border shadow-sm p-8 max-w-3xl mx-auto text-center">
+        <h3 className="text-lg font-bold text-brand-dark mb-3">Admin access required</h3>
+        <p className="text-sm text-brand-grey mb-6">Please enter the admin password to access the Record database.</p>
+        <div className="max-w-md mx-auto space-y-4">
+          <input
+            type="password"
+            value={requiredPassword}
+            onChange={(e) => setRequiredPassword(e.target.value)}
+            placeholder="Admin password"
+            className="w-full rounded-2xl border border-brand-border bg-brand-bg/60 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
+          />
+          <button
+            onClick={handleAdminUnlock}
+            className="w-full rounded-2xl bg-brand-emerald px-5 py-3 text-sm font-bold text-white hover:bg-brand-emerald/90 transition"
+          >
+            Unlock Records
+          </button>
+          {authError && <div className="text-sm text-rose-600">{authError}</div>}
+        </div>
+      </div>
+    );
+  }
+
   const filtered = records.filter(r => {
     const haystack = `${r.partner} ${r.theme} ${r.resultType} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
     return haystack.includes(searchTerm.toLowerCase());

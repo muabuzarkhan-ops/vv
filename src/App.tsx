@@ -441,6 +441,7 @@ export default function App() {
         return (
           <DocumentsView
             documents={documents}
+            user={user}
             onUploadDocument={handleUploadDocument}
             onDeleteDocument={handleDeleteDocument}
           />
