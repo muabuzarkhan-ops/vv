@@ -32,8 +32,8 @@ export default function SyncView({
   const [role, setRole] = useState<'Field officer' | 'Analyst' | 'Admin'>('Field officer');
   const [org, setOrg] = useState('Anesvad Alliance');
   const [serverUrl, setServerUrl] = useState(`http://localhost:3000`);
-  const [adminName, setAdminName] = useState('Anesvad');
-  const [adminPassword, setAdminPassword] = useState('11223344');
+  const [adminName, setAdminName] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -174,6 +174,7 @@ export default function SyncView({
                 <input
                   type="text"
                   value={adminName}
+                  placeholder="Enter admin username"
                   onChange={(e) => setAdminName(e.target.value)}
                   className="w-full text-xs font-semibold text-brand-dark border border-brand-border rounded-xl p-3 outline-none focus:border-brand-emerald bg-brand-bg/30 transition-all font-sans"
                   required
@@ -184,6 +185,7 @@ export default function SyncView({
                 <input
                   type="password"
                   value={adminPassword}
+                  placeholder="Enter admin password"
                   onChange={(e) => setAdminPassword(e.target.value)}
                   className="w-full text-xs font-semibold text-brand-dark border border-brand-border rounded-xl p-3 outline-none focus:border-brand-emerald bg-brand-bg/30 transition-all font-sans"
                   required

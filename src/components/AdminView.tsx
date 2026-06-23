@@ -26,8 +26,8 @@ const RESULT_OPTIONS = ['Policy change', 'Service delivery', 'Capacity building'
 const CONFIDENCE_OPTIONS = ['High', 'Medium', 'Low'] as const;
 
 export default function AdminView({ records, user, onAdminLogin, onLogout, onUpdateRecord, onDeleteRecord }: AdminViewProps) {
-  const [loginUser, setLoginUser] = useState('Anesvad');
-  const [loginPassword, setLoginPassword] = useState('11223344');
+  const [loginUser, setLoginUser] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginFeedback, setLoginFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -111,6 +111,7 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
             <input
               type="text"
               value={loginUser}
+              placeholder="Enter admin username"
               onChange={(e) => setLoginUser(e.target.value)}
               className="w-full rounded-2xl border border-brand-border bg-brand-bg/60 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
             />
@@ -120,6 +121,7 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
             <input
               type="password"
               value={loginPassword}
+              placeholder="Enter admin password"
               onChange={(e) => setLoginPassword(e.target.value)}
               className="w-full rounded-2xl border border-brand-border bg-brand-bg/60 px-4 py-3 text-sm text-brand-dark outline-none focus:border-brand-emerald"
             />
