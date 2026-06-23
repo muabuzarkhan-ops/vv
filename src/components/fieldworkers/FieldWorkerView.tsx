@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { RecordItem, UserState } from '../types';
-import { FIELD_WORKERS } from '../data/fieldworkers';
+import { FIELD_WORKERS } from '../../data/fieldworkers';
 import { Sparkles, FilePlus, UploadCloud, Check, Search, CloudUpload } from 'lucide-react';
 
 interface FieldWorkerViewProps {
