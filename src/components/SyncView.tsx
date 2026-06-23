@@ -7,6 +7,7 @@ import { auth, googleAuthProvider } from '../lib/firebase.ts';
 interface SyncViewProps {
   user: UserState | null;
   onLogin: (user: UserState) => void;
+  onAdminLogin: (username: string, password: string) => Promise<{ success: boolean; message: string }>;
   onLogout: () => void;
   pendingChangesCount: number;
   onTriggerSync: () => Promise<{ added: number; updated: number }>;
@@ -17,6 +18,7 @@ interface SyncViewProps {
 export default function SyncView({
   user,
   onLogin,
+  onAdminLogin,
   onLogout,
   pendingChangesCount,
   onTriggerSync,
@@ -30,6 +32,8 @@ export default function SyncView({
   const [role, setRole] = useState<'Field officer' | 'Analyst' | 'Admin'>('Field officer');
   const [org, setOrg] = useState('Anesvad Alliance');
   const [serverUrl, setServerUrl] = useState(`http://localhost:3000`);
+  const [adminName, setAdminName] = useState('Anesvad');
+  const [adminPassword, setAdminPassword] = useState('11223344');
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -99,6 +103,18 @@ export default function SyncView({
     }
   };
 
+  const handleAdminSubmit = async () => {
+    setLoading(true);
+    setFeedback(null);
+    const result = await onAdminLogin(adminName, adminPassword);
+    if (result.success) {
+      setFeedback({ type: 'success', msg: result.message });
+    } else {
+      setFeedback({ type: 'error', msg: result.message });
+    }
+    setLoading(false);
+  };
+
   const handlePullClick = async () => {
     setLoading(true);
     setFeedback(null);
@@ -152,58 +168,41 @@ export default function SyncView({
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            <div className="border-b border-brand-bg pb-2.5 mb-1.5">
-              <span className="text-[10px] font-extrabold tracking-wider text-brand-dark/80 font-mono">
-                SECURE FEDERATED SIGN-IN
-              </span>
-            </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[10px] font-extrabold text-brand-grey uppercase tracking-wider mb-1.5 font-mono">ASSIGNED ROLE</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as any)}
-                  className="w-full text-xs font-bold text-brand-dark border border-brand-border rounded-xl p-3 outline-none focus:border-brand-emerald bg-brand-bg/30 transition-all cursor-pointer"
-                >
-                  <option value="Field officer">Field officer</option>
-                  <option value="Analyst">Analyst</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-extrabold text-brand-grey uppercase tracking-wider mb-1.5 font-mono">AFFILIATION</label>
+                <label className="block text-[10px] font-extrabold text-brand-grey uppercase tracking-wider mb-1.5 font-mono">ADMIN USERNAME</label>
                 <input
                   type="text"
-                  value={org}
-                  onChange={(e) => setOrg(e.target.value)}
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                  className="w-full text-xs font-semibold text-brand-dark border border-brand-border rounded-xl p-3 outline-none focus:border-brand-emerald bg-brand-bg/30 transition-all font-sans"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-extrabold text-brand-grey uppercase tracking-wider mb-1.5 font-mono">ADMIN PASSWORD</label>
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
                   className="w-full text-xs font-semibold text-brand-dark border border-brand-border rounded-xl p-3 outline-none focus:border-brand-emerald bg-brand-bg/30 transition-all font-sans"
                   required
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-extrabold text-brand-grey uppercase tracking-wider mb-1.5 font-mono">SERVER ROOT PORTAL URL</label>
-              <input
-                type="text"
-                value={serverUrl}
-                onChange={(e) => setServerUrl(e.target.value)}
-                className="w-full text-xs font-semibold text-brand-dark border border-brand-border rounded-xl p-3 outline-none focus:border-brand-emerald bg-brand-bg/30 transition-all font-mono"
-                required
-              />
-            </div>
-
             <button
-              onClick={handleGoogleSignIn}
+              onClick={handleAdminSubmit}
               disabled={loading}
               className="w-full py-3 bg-brand-emerald hover:bg-brand-emerald/90 text-white font-extrabold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 mt-2 disabled:opacity-50 cursor-pointer select-none"
             >
-              <svg className="w-4 h-4 mr-1 text-white shrink-0 fill-current" viewBox="0 0 24 24">
-                <path d="M12.24 10.285V13.4h6.887c-.648 2.41-2.519 4.19-5.136 4.19A5.69 5.69 0 0 1 8.24 11.9a5.69 5.69 0 0 1 5.751-5.69c1.472 0 2.82.52 3.89 1.52l2.42-2.42A9.63 9.63 0 0 0 13.99 2 9.9 9.9 0 0 0 4 11.9a9.9 9.9 0 0 0 9.99 9.9c5.18 0 8.01-3.64 8.01-8.1 0-.6-.05-1.14-.15-1.62H12.24z"/>
-              </svg>
-              {loading ? 'Processing federated auth...' : 'Sign in with Google Account'}
+              {loading ? 'Verifying admin credentials...' : 'Login as Admin'}
             </button>
+
+            <div className="p-4 rounded-2xl bg-brand-bg/70 border border-brand-border text-xs text-brand-grey">
+              Enter the fixed admin credentials to approve and upload pending submissions.
+              <div className="mt-2 font-bold text-brand-dark text-[11px]">Username: Anesvad | Password: 11223344</div>
+            </div>
           </div>
         )}
       </div>

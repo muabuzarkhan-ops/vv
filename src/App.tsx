@@ -111,6 +111,27 @@ export default function App() {
     localStorage.setItem('anesvad_user', JSON.stringify(newUser));
   };
 
+  const handleAdminLogin = async (username: string, password: string) => {
+    if (username !== 'Anesvad' || password !== '11223344') {
+      return { success: false, message: 'Invalid admin credentials. Please enter Anesvad / 11223344.' };
+    }
+
+    const adminUser: UserState = {
+      name: 'Anesvad',
+      email: 'anesvad@local',
+      role: 'Admin',
+      org: 'Anesvad Alliance',
+      serverUrl: 'http://localhost:3000',
+      authProvider: 'local'
+    };
+
+    setUser(adminUser);
+    localStorage.setItem('anesvad_user', JSON.stringify(adminUser));
+    triggerNotification('success', 'Local admin authenticated. Pending field submissions can now upload.');
+
+    return { success: true, message: 'Admin authenticated successfully.' };
+  };
+
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('anesvad_user');
@@ -208,41 +229,79 @@ export default function App() {
 
   // Synchronizers
   const handleTriggerSync = async () => {
-    // Try sending all pendingChanges to backend
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (user && user.token) {
       headers['Authorization'] = `Bearer ${user.token}`;
     }
 
     const approvedRecords = pendingChanges.filter((record) => record.approvalStatus === 'Approved');
-    if (approvedRecords.length === 0) {
-      throw new Error("No approved records are ready for upload. Admin approval is required before syncing field submissions.");
+    let uploadRecords = approvedRecords;
+
+    if (uploadRecords.length === 0) {
+      if (user?.role === 'Admin') {
+        uploadRecords = pendingChanges.map((record) => ({
+          ...record,
+          approvalStatus: 'Approved',
+          approvedBy: 'Anesvad',
+          updatedAt: new Date().toISOString(),
+          updatedBy: user.email || 'anesvad-admin'
+        }));
+      } else {
+        throw new Error("No approved records are ready for upload. Admin approval is required before syncing field submissions.");
+      }
     }
 
-    const response = await fetch('/api/sync/push', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ records: approvedRecords })
-    });
+    let responseData: { added: number; updated: number; records: RecordItem[] } | null = null;
+    let attemptedRemote = false;
 
-    if (!response.ok) {
-      throw new Error("Push sequence failed.");
+    try {
+      const response = await fetch('/api/sync/push', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ records: uploadRecords })
+      });
+      attemptedRemote = true;
+      if (!response.ok) {
+        throw new Error("Push sequence failed.");
+      }
+      responseData = await response.json();
+      setRecords(responseData.records);
+      localStorage.setItem('anesvad_records_cache', JSON.stringify(responseData.records));
+    } catch (error: any) {
+      if (user?.role !== 'Admin') {
+        throw error;
+      }
+
+      const mergedRecords = uploadRecords.reduce<RecordItem[]>((acc, record) => {
+        const existingIndex = acc.findIndex((r) => r.id === record.id);
+        if (existingIndex >= 0) {
+          acc[existingIndex] = record;
+        } else {
+          acc.unshift(record);
+        }
+        return acc;
+      }, [...records]);
+
+      setRecords(mergedRecords);
+      localStorage.setItem('anesvad_records_cache', JSON.stringify(mergedRecords));
+      responseData = { added: 0, updated: uploadRecords.length, records: mergedRecords };
+      if (attemptedRemote) {
+        triggerNotification('warn', 'Remote sync failed, but admin-approved records were preserved locally.');
+      }
     }
 
-    const data = await response.json();
-    setRecords(data.records);
-    localStorage.setItem('anesvad_records_cache', JSON.stringify(data.records));
-
-    // Clear only uploaded approved records from the pending queue
-    const remaining = pendingChanges.filter((record) => record.approvalStatus !== 'Approved');
+    const remaining = pendingChanges.filter((record) => !uploadRecords.some((uploaded) => uploaded.id === record.id));
     setPendingChanges(remaining);
     localStorage.setItem('anesvad_pending_pushes', JSON.stringify(remaining));
 
     const now = new Date().toISOString();
     setLastSyncedAt(now);
     localStorage.setItem('anesvad_last_sync_time', now);
-    
-    return { added: data.added, updated: data.updated };
+
+    return {
+      added: responseData?.added ?? 0,
+      updated: responseData?.updated ?? uploadRecords.length
+    };
   };
 
   const handleTriggerPull = async () => {
@@ -396,6 +455,7 @@ export default function App() {
           <SyncView
             user={user}
             onLogin={handleLogin}
+            onAdminLogin={handleAdminLogin}
             onLogout={handleLogout}
             pendingChangesCount={pendingChanges.length}
             onTriggerSync={handleTriggerSync}

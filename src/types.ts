@@ -46,6 +46,7 @@ export interface UserState {
   org: string;
   serverUrl: string;
   token?: string;
+  authProvider?: 'google' | 'local';
 }
 
 export interface DatabaseState {
