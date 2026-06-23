@@ -35,8 +35,8 @@ export default function FieldWorkerView({ records, user, onSaveRecord }: FieldWo
   const availableWorkers = useMemo(() => FIELD_WORKERS, []);
 
   const currentCountryWorkers = useMemo(
-    () => availableWorkers,
-    [availableWorkers]
+    () => availableWorkers.filter((w) => w.country === country),
+    [availableWorkers, country]
   );
 
   const handleCountryContinue = () => {
@@ -50,11 +50,15 @@ export default function FieldWorkerView({ records, user, onSaveRecord }: FieldWo
       setLoginError('Invalid worker ID or password.');
       return;
     }
+    if (worker.country !== country) {
+      setLoginError(`This worker account is registered for ${worker.country}. Please select the correct country first.`);
+      return;
+    }
 
-    setProfile({ id: worker.id, name: worker.name, country, role: worker.role });
+    setProfile({ id: worker.id, name: worker.name, country: worker.country, role: worker.role });
     setStep('work');
     setLoginError(null);
-    setMessage(`Welcome ${worker.name} (${worker.role}). Your submissions for ${country} are pending admin approval.`);
+    setMessage(`Welcome ${worker.name} (${worker.role}). Your submissions for ${worker.country} are pending admin approval.`);
   };
 
   const handleSave = () => {

@@ -487,6 +487,7 @@ export default function App() {
             onLogout={handleLogout}
             onUpdateRecord={handleUpdateRecord}
             onDeleteRecord={handleDeleteRecord}
+            onAddRecord={handleAddRecord}
           />
         );
       default:

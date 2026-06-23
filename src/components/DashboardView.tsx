@@ -24,7 +24,9 @@ interface DashboardViewProps {
 
 export default function DashboardView({ records, filters, onFilterChange }: DashboardViewProps) {
   // Compute aggregated KPIs
-  const filtered = records.filter(r => {
+  const visibleRecords = records.filter((r) => r.approvalStatus === 'Approved');
+
+  const filtered = visibleRecords.filter(r => {
     const haystack = `${r.partner} ${r.theme} ${r.resultType} ${r.country} ${r.region} ${r.level} ${r.disease} ${r.evidence} ${r.source}`.toLowerCase();
     const query = filters.search.toLowerCase();
     return (filters.theme === 'All' || r.theme === filters.theme)

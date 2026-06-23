@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Check, Trash2, Edit2, X, Search, Square, CheckSquare } from 'lucide-react';
 import { RecordItem, UserState } from '../types';
+import { FIELD_WORKERS } from '../data/fieldworkers';
 
 interface AdminViewProps {
   records: RecordItem[];
@@ -9,6 +10,7 @@ interface AdminViewProps {
   onLogout: () => void;
   onUpdateRecord: (record: RecordItem) => void;
   onDeleteRecord: (id: string) => void;
+  onAddRecord: (record: RecordItem) => void;
 }
 
 const THEME_OPTIONS = [
@@ -25,7 +27,7 @@ const DISEASE_OPTIONS = ['Buruli ulcer', 'Leprosy', 'Yaws', 'Lymphatic filariasi
 const RESULT_OPTIONS = ['Policy change', 'Service delivery', 'Capacity building', 'Research output', 'Community engagement', 'System strengthening'];
 const CONFIDENCE_OPTIONS = ['High', 'Medium', 'Low'] as const;
 
-export default function AdminView({ records, user, onAdminLogin, onLogout, onUpdateRecord, onDeleteRecord }: AdminViewProps) {
+export default function AdminView({ records, user, onAdminLogin, onLogout, onUpdateRecord, onDeleteRecord, onAddRecord }: AdminViewProps) {
   const [loginUser, setLoginUser] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginFeedback, setLoginFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
@@ -34,8 +36,28 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editRecord, setEditRecord] = useState<RecordItem | null>(null);
+  const [workerCountry, setWorkerCountry] = useState('Benin');
+  const [selectedWorkerId, setSelectedWorkerId] = useState(FIELD_WORKERS[0]?.id || '');
+  const [fieldPartner, setFieldPartner] = useState('');
+  const [fieldRegion, setFieldRegion] = useState('');
+  const [fieldTheme, setFieldTheme] = useState(THEME_OPTIONS[0]);
+  const [fieldLevel, setFieldLevel] = useState(LEVEL_OPTIONS[1]);
+  const [fieldDisease, setFieldDisease] = useState(DISEASE_OPTIONS[0]);
+  const [fieldResultType, setFieldResultType] = useState(RESULT_OPTIONS[1]);
+  const [fieldReached, setFieldReached] = useState(0);
+  const [fieldConfidence, setFieldConfidence] = useState<'High' | 'Medium' | 'Low'>('Medium');
+  const [fieldEvidence, setFieldEvidence] = useState('');
+  const [fieldUploadPreview, setFieldUploadPreview] = useState('');
+  const [fieldSubmitMessage, setFieldSubmitMessage] = useState<string | null>(null);
 
-    const pendingFieldworkerRecords = useMemo(() => {
+  const currentWorkersByCountry = useMemo(
+    () => FIELD_WORKERS.filter((worker) => worker.country === workerCountry),
+    [workerCountry]
+  );
+
+  const selectedWorker = FIELD_WORKERS.find((worker) => worker.id === selectedWorkerId);
+
+  const pendingFieldworkerRecords = useMemo(() => {
     return records.filter((record) => record.approvalStatus !== 'Approved' || record.submittedByRole !== 'Admin');
   }, [records]);
 
@@ -101,7 +123,59 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
     setEditRecord((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
-  const pendingFieldworkerRecords = records.filter((record) => record.approvalStatus !== 'Approved' || record.submittedByRole !== 'Admin');
+  const handleFieldWorkerRecordSave = () => {
+    if (!selectedWorker) return;
+    if (!fieldPartner.trim() || !fieldEvidence.trim()) {
+      setFieldSubmitMessage('Please fill in partner and evidence before saving.');
+      return;
+    }
+
+    const newRecord: RecordItem = {
+      id: `fieldworker-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      partner: fieldPartner,
+      theme: fieldTheme,
+      country: selectedWorker.country,
+      region: fieldRegion,
+      level: fieldLevel,
+      disease: fieldDisease,
+      evidence: fieldEvidence,
+      reached: fieldReached,
+      confidence: fieldConfidence,
+      source: 'Field worker upload',
+      resultType: fieldResultType,
+      approvalStatus: 'Pending',
+      submittedBy: selectedWorker.name,
+      submittedByRole: selectedWorker.role,
+      updatedAt: new Date().toISOString(),
+      updatedBy: selectedWorker.id
+    };
+
+    onAddRecord(newRecord);
+    setFieldSubmitMessage('Field worker submission added and pending admin approval.');
+    setFieldPartner('');
+    setFieldRegion('');
+    setFieldTheme(THEME_OPTIONS[0]);
+    setFieldLevel(LEVEL_OPTIONS[1]);
+    setFieldDisease(DISEASE_OPTIONS[0]);
+    setFieldResultType(RESULT_OPTIONS[1]);
+    setFieldReached(0);
+    setFieldConfidence('Medium');
+    setFieldEvidence('');
+    setFieldUploadPreview('');
+  };
+
+  const handleFieldUploadFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result as string;
+      setFieldUploadPreview(text.slice(0, 1500));
+      setFieldEvidence(text.slice(0, 3000));
+      setFieldSubmitMessage('File loaded. Please review and save as a new pending submission.');
+    };
+    reader.readAsText(file);
+  };
 
   if (!user || user.role !== 'Admin') {
     return (
