@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { RecordItem, FilterState } from '../types';
 import { THEMES, LEVELS, DISEASES, COUNTRIES } from '../data/demo';
 import { Search, FilterX, HelpCircle, CheckCircle, Database } from 'lucide-react';
+import MapWestAfrica from './MapWestAfrica';
 
 const STATIC_THEMES = [
   "Case detection",
@@ -57,6 +58,21 @@ export default function DashboardView({ records, filters, onFilterChange }: Dash
     acc[curr.country] = (acc[curr.country] || 0) + Number(curr.reached || 0);
     return acc;
   }, {});
+
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+
+  const countryCounts = filtered.reduce<Record<string, number>>((acc, curr) => {
+    acc[curr.country] = (acc[curr.country] || 0) + 1;
+    return acc;
+  }, {});
+
+  const mapData = useMemo(() => {
+    const out: Record<string, { reached: number; count: number }> = {};
+    STATIC_COUNTRIES.forEach((c) => {
+      out[c] = { reached: countryReached[c] || 0, count: countryCounts[c] || 0 };
+    });
+    return out;
+  }, [countryReached, countryCounts]);
 
   const handleResetFilters = () => {
     onFilterChange({
@@ -278,44 +294,37 @@ export default function DashboardView({ records, filters, onFilterChange }: Dash
           </div>
         </div>
 
-        {/* Aggregated Geographical Grid (Beneficiaries reached) */}
+        {/* Aggregated Geographical Grid / Map (Beneficiaries reached) */}
         <div className="bg-white rounded-2xl border border-brand-border p-5 shadow-sm">
           <div className="flex items-center justify-between mb-4 border-b border-brand-bg pb-3">
             <h4 className="font-sans font-bold text-brand-dark text-sm tracking-tight">West Africa Aggregation Status</h4>
             <span className="text-[10px] text-brand-emerald bg-brand-emerald/10 border border-brand-emerald/20 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Active countries</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3.5">
-            {STATIC_COUNTRIES.map((ct) => {
-              const reachedVal = countryReached[ct] || 0;
-              const recordsInCountry = filtered.filter(f => f.country === ct).length;
-              const isFilterSelected = filters.country === ct;
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <MapWestAfrica
+              data={mapData}
+              selected={selectedCountry}
+              onSelect={(c) => {
+                setSelectedCountry((prev) => (prev === c ? null : c));
+                onFilterChange({ ...filters, country: filters.country === c ? 'All' : c });
+              }}
+            />
 
-              return (
-                <button
-                  key={ct}
-                  onClick={() => onFilterChange({ ...filters, country: filters.country === ct ? 'All' : ct })}
-                  className={`p-4 rounded-xl text-left border flex flex-col justify-between h-28 transition-all hover:shadow-md cursor-pointer group ${
-                    isFilterSelected
-                      ? 'bg-brand-emerald/10 border-brand-emerald ring-1 ring-brand-emerald/30'
-                      : 'bg-brand-bg/30 border-brand-border hover:border-brand-grey/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-xs font-bold font-sans text-brand-dark uppercase tracking-wide group-hover:text-brand-emerald transition-colors">{ct}</span>
-                    <span className="text-[10px] font-mono text-brand-grey group-hover:text-brand-dark font-extrabold">
-                      {recordsInCountry} doc{recordsInCountry !== 1 && 's'}
-                    </span>
+            <div className="p-2">
+              {selectedCountry ? (
+                <div className="rounded-2xl border border-brand-border p-4 bg-white">
+                  <div className="flex items-center justify-between mb-2">
+                    <h5 className="font-bold text-brand-dark">{selectedCountry}</h5>
+                    <button onClick={() => { setSelectedCountry(null); onFilterChange({ ...filters, country: 'All' }); }} className="text-sm text-brand-grey">Clear</button>
                   </div>
-                  <div>
-                    <strong className="text-xl font-black tracking-tight text-brand-dark font-sans block leading-none">
-                      {reachedVal.toLocaleString()}
-                    </strong>
-                    <span className="text-[9px] text-brand-grey font-bold uppercase tracking-wider mt-1 block">PEOPLE REACHED</span>
-                  </div>
-                </button>
-              );
-            })}
+                  <div className="text-sm text-brand-grey mb-3">Records: <strong className="text-brand-dark">{mapData[selectedCountry]?.count || 0}</strong></div>
+                  <div className="text-sm text-brand-grey">People reached: <strong className="text-brand-dark">{(mapData[selectedCountry]?.reached || 0).toLocaleString()}</strong></div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-brand-border p-4 bg-white text-sm text-brand-grey">Click a country on the map to view aggregated data.</div>
+              )}
+            </div>
           </div>
         </div>
       </div>
