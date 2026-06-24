@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { Check, Trash2, Edit2, X, Search, Square, CheckSquare } from 'lucide-react';
 import { RecordItem, UserState } from '../types';
 import { FIELD_WORKERS } from '../data/fieldworkers';
 
@@ -496,14 +495,10 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
         )}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6 text-xs">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6 text-xs">
         <div className="rounded-3xl border border-brand-border bg-brand-bg/80 p-4">
           <div className="text-brand-grey uppercase tracking-[0.2em] font-semibold mb-2">Total records</div>
           <div className="text-3xl font-bold text-brand-dark">{records.length}</div>
-        </div>
-        <div className="rounded-3xl border border-brand-border bg-brand-bg/80 p-4">
-          <div className="text-brand-grey uppercase tracking-[0.2em] font-semibold mb-2">Selected</div>
-          <div className="text-3xl font-bold text-brand-dark">{selectedIds.length}</div>
         </div>
         <div className="rounded-3xl border border-brand-border bg-brand-bg/80 p-4">
           <div className="text-brand-grey uppercase tracking-[0.2em] font-semibold mb-2">Search filter</div>
@@ -521,33 +516,14 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
         <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={selectAll}
-            className="rounded-2xl bg-brand-emerald/10 border border-brand-emerald text-brand-emerald px-4 py-2 text-xs font-bold hover:bg-brand-emerald/15 transition"
-          >
-            <CheckSquare className="w-4 h-4 inline-block mr-2" /> Select all
-          </button>
-          <button
-            onClick={clearSelection}
-            className="rounded-2xl border border-brand-border px-4 py-2 text-xs font-bold text-brand-dark hover:bg-brand-bg transition"
-          >
-            <Square className="w-4 h-4 inline-block mr-2" /> Clear selection
-          </button>
+          {/* Controls removed */}
         </div>
-        <button
-          onClick={handleBulkDelete}
-          disabled={selectedIds.length === 0}
-          className="rounded-2xl bg-rose-600 text-white px-4 py-2 text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-rose-700 transition"
-        >
-          <Trash2 className="w-4 h-4 inline-block mr-2" /> Delete selected
-        </button>
       </div>
 
       <div className="overflow-x-auto w-full rounded-3xl border border-brand-border bg-brand-bg/50">
         <table className="w-full text-left border-collapse min-w-[1100px]">
           <thead>
             <tr className="bg-white/90 border-b border-brand-border text-brand-grey text-[10px] uppercase tracking-[0.2em] font-semibold">
-              <th className="px-4 py-4 w-[48px]"></th>
               <th className="px-4 py-4">Partner</th>
               <th className="px-4 py-4">Country</th>
               <th className="px-4 py-4">Theme</th>
@@ -555,139 +531,24 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
               <th className="px-4 py-4">Disease</th>
               <th className="px-4 py-4">Reached</th>
               <th className="px-4 py-4">Approval</th>
-              <th className="px-4 py-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-border text-sm text-brand-dark">
             {filteredRecords.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-brand-grey">No records match the filter.</td>
+                <td colSpan={7} className="px-4 py-8 text-center text-brand-grey">No records match the filter.</td>
               </tr>
             ) : (
               filteredRecords.map((record) => {
-                const isSelected = selectedIds.includes(record.id);
-                const isEditing = editingId === record.id;
-
                 return (
-                  <tr key={record.id} className={isSelected ? 'bg-brand-emerald/10' : ''}>
-                    <td className="px-4 py-3 align-top">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(record.id)}
-                        className="h-4 w-4 text-brand-emerald rounded border-brand-border"
-                      />
-                    </td>
-                    {isEditing && editRecord ? (
-                      <>
-                        <td className="px-4 py-3 align-top">
-                          <input
-                            type="text"
-                            value={editRecord.partner}
-                            onChange={(e) => updateEditField('partner', e.target.value)}
-                            className="w-full rounded-xl border border-brand-border px-3 py-2 text-sm text-brand-dark outline-none"
-                          />
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <input
-                            type="text"
-                            value={editRecord.country}
-                            onChange={(e) => updateEditField('country', e.target.value)}
-                            className="w-full rounded-xl border border-brand-border px-3 py-2 text-sm text-brand-dark outline-none"
-                          />
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <select
-                            value={editRecord.theme}
-                            onChange={(e) => updateEditField('theme', e.target.value)}
-                            className="w-full rounded-xl border border-brand-border px-3 py-2 text-sm text-brand-dark outline-none"
-                          >
-                            {THEME_OPTIONS.map((option) => (
-                              <option key={option} value={option}>{option}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <select
-                            value={editRecord.resultType}
-                            onChange={(e) => updateEditField('resultType', e.target.value)}
-                            className="w-full rounded-xl border border-brand-border px-3 py-2 text-sm text-brand-dark outline-none"
-                          >
-                            {RESULT_OPTIONS.map((option) => (
-                              <option key={option} value={option}>{option}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <select
-                            value={editRecord.disease}
-                            onChange={(e) => updateEditField('disease', e.target.value)}
-                            className="w-full rounded-xl border border-brand-border px-3 py-2 text-sm text-brand-dark outline-none"
-                          >
-                            {DISEASE_OPTIONS.map((option) => (
-                              <option key={option} value={option}>{option}</option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <input
-                            type="number"
-                            value={editRecord.reached}
-                            onChange={(e) => updateEditField('reached', Number(e.target.value))}
-                            className="w-full rounded-xl border border-brand-border px-3 py-2 text-sm text-brand-dark outline-none"
-                          />
-                        </td>
-                        <td className="px-4 py-3 align-top">
-                          <select
-                            value={editRecord.approvalStatus || 'Pending'}
-                            onChange={(e) => updateEditField('approvalStatus', e.target.value)}
-                            className="w-full rounded-xl border border-brand-border px-3 py-2 text-sm text-brand-dark outline-none"
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                          </select>
-                        </td>
-                        <td className="px-4 py-3 text-right align-top space-x-2">
-                          <button
-                            onClick={saveEdit}
-                            className="rounded-2xl bg-brand-emerald px-3 py-2 text-[11px] font-bold text-white hover:bg-brand-emerald/90 transition"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="rounded-2xl border border-brand-border px-3 py-2 text-[11px] font-bold text-brand-dark hover:bg-brand-bg transition"
-                          >
-                            Cancel
-                          </button>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-4 py-3 align-top">{record.partner}</td>
-                        <td className="px-4 py-3 align-top">{record.country}</td>
-                        <td className="px-4 py-3 align-top">{record.theme}</td>
-                        <td className="px-4 py-3 align-top">{record.resultType}</td>
-                        <td className="px-4 py-3 align-top">{record.disease}</td>
-                        <td className="px-4 py-3 align-top">{record.reached}</td>
-                        <td className="px-4 py-3 align-top">{record.approvalStatus || 'Pending'}</td>
-                        <td className="px-4 py-3 align-top text-right space-x-2">
-                          <button
-                            onClick={() => beginEdit(record)}
-                            className="rounded-2xl border border-brand-border px-3 py-2 text-[11px] font-bold text-brand-dark hover:bg-brand-bg transition"
-                          >
-                            <Edit2 className="w-3.5 h-3.5 inline-block mr-1" /> Edit
-                          </button>
-                          <button
-                            onClick={() => onDeleteRecord(record.id)}
-                            className="rounded-2xl bg-rose-600 px-3 py-2 text-[11px] font-bold text-white hover:bg-rose-700 transition"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 inline-block mr-1" /> Delete
-                          </button>
-                        </td>
-                      </>
-                    )}
+                  <tr key={record.id} className="">
+                    <td className="px-4 py-3 align-top">{record.partner}</td>
+                    <td className="px-4 py-3 align-top">{record.country}</td>
+                    <td className="px-4 py-3 align-top">{record.theme}</td>
+                    <td className="px-4 py-3 align-top">{record.resultType}</td>
+                    <td className="px-4 py-3 align-top">{record.disease}</td>
+                    <td className="px-4 py-3 align-top">{record.reached}</td>
+                    <td className="px-4 py-3 align-top">{record.approvalStatus || 'Pending'}</td>
                   </tr>
                 );
               })
