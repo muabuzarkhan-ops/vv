@@ -76,14 +76,14 @@ export const requireAuth = async (
   }
 };
 
-// Require authenticated user to be an Admin
+// Ensure the authenticated user has the Admin role
 export const requireAdmin = (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   if (!req.dbUser || !req.dbUser.isAdmin) {
-    return res.status(403).json({ error: 'Forbidden: Admin access required. Please login with admin credentials.' });
+    return res.status(403).json({ error: 'Forbidden: Admin access required' });
   }
   next();
 };
