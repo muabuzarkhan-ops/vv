@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 import { db } from "./src/db/index.ts";
 import { records, users, documents, auditLogs, notifications } from "./src/db/schema.ts";
 import { eq, desc, asc } from "drizzle-orm";
-import { requireAuth, AuthRequest } from "./src/middleware/auth.ts";
+import { requireAuth, requireAdmin, AuthRequest } from "./src/middleware/auth.ts";
 
 dotenv.config();
 
@@ -269,8 +269,8 @@ app.post("/api/auth/verify", requireAuth, async (req: AuthRequest, res) => {
   res.json({ success: true, user: req.dbUser });
 });
 
-// Retrieve all structural records
-app.get("/api/records", async (req, res) => {
+// Retrieve all structural records (Admin only)
+app.get("/api/records", requireAuth, requireAdmin, async (req, res) => {
   try {
     const results = await db.select().from(records).orderBy(desc(records.updatedAt));
     const formatted: RecordItem[] = results.map(r => ({
@@ -392,8 +392,8 @@ app.delete("/api/records/:id", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-// Synchronize: Pull centralized data
-app.get("/api/sync/pull", async (req, res) => {
+// Synchronize: Pull centralized data (Authenticated users)
+app.get("/api/sync/pull", requireAuth, async (req: AuthRequest, res) => {
   try {
     const results = await db.select().from(records).orderBy(desc(records.updatedAt));
     const formatted: RecordItem[] = results.map(r => ({
@@ -509,8 +509,8 @@ app.post("/api/sync/push", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-// Reset clinical dataset to West African defaults
-app.post("/api/records/reset", requireAuth, async (req: AuthRequest, res) => {
+// Reset clinical dataset to West African defaults (Admin only)
+app.post("/api/records/reset", requireAuth, requireAdmin, async (req: AuthRequest, res) => {
   try {
     // Purge clinical records
     await db.delete(records);
@@ -543,8 +543,8 @@ app.post("/api/records/reset", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-// Document archival endpoint list
-app.get("/api/documents", async (req, res) => {
+// Document archival endpoint list (Admin only)
+app.get("/api/documents", requireAuth, requireAdmin, async (req, res) => {
   try {
     const list = await db.select().from(documents).orderBy(desc(documents.uploadedAt));
     res.json({ success: true, documents: list });
@@ -599,8 +599,8 @@ app.delete("/api/documents/:id", requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
-// AI Classify Text using Gemini 3.5 Flash Schema Extraction
-app.post("/api/classify", async (req, res) => {
+// AI Classify Text using Gemini 3.5 Flash Schema Extraction (Authenticated users)
+app.post("/api/classify", requireAuth, async (req: AuthRequest, res) => {
   try {
     const { text } = req.body;
     if (!text || text.trim().length === 0) {
@@ -658,8 +658,8 @@ Ensure the theme, level, and disease are mapped accurately to Anesvad's formal t
   }
 });
 
-// AI Insights Generator using Gemini 3.5 Flash
-app.post("/api/insights", async (req, res) => {
+// AI Insights Generator using Gemini 3.5 Flash (Authenticated users)
+app.post("/api/insights", requireAuth, async (req: AuthRequest, res) => {
   try {
     const { records: clientRecs } = req.body;
     let finalRecords = clientRecs;

@@ -75,3 +75,15 @@ export const requireAuth = async (
     return res.status(401).json({ error: 'Unauthorized: Token is expired or invalid' });
   }
 };
+
+// Require authenticated user to be an Admin
+export const requireAdmin = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.dbUser || !req.dbUser.isAdmin) {
+    return res.status(403).json({ error: 'Forbidden: Admin access required. Please login with admin credentials.' });
+  }
+  next();
+};
