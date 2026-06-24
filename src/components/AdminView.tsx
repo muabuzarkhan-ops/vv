@@ -49,6 +49,9 @@ export default function AdminView({ records, user, onAdminLogin, onLogout, onUpd
   const [fieldEvidence, setFieldEvidence] = useState('');
   const [fieldUploadPreview, setFieldUploadPreview] = useState('');
   const [fieldSubmitMessage, setFieldSubmitMessage] = useState<string | null>(null);
+  const [workerPassword, setWorkerPassword] = useState('');
+  const [workerProfile, setWorkerProfile] = useState<{ id: string; name: string; role: string; country: string } | null>(null);
+  const [workerLoginError, setWorkerLoginError] = useState<string | null>(null);
 
   const currentWorkersByCountry = useMemo(
     () => FIELD_WORKERS.filter((worker) => worker.country === workerCountry),

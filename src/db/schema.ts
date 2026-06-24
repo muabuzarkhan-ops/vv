@@ -21,6 +21,7 @@ export const records = pgTable('records', {
   level: text('level').notNull(),
   disease: text('disease').notNull(),
   evidence: text('evidence').notNull(),
+  resultType: text('result_type').notNull().default('Service delivery'), // 'Policy change' | 'Service delivery' | 'Capacity building' | 'Research output' | 'Community engagement' | 'System strengthening'
   reached: integer('reached').notNull().default(0),
   confidence: text('confidence').notNull().default('Medium'), // 'High' | 'Medium' | 'Low'
   source: text('source').notNull(),
