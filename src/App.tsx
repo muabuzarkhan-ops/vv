@@ -12,6 +12,7 @@ import InsightsView from './components/InsightsView';
 import SyncView from './components/SyncView';
 import AdminView from './components/AdminView';
 import FieldWorkerView from './components/fieldworkers/FieldWorkerView';
+import TheoryOfChangeView from './components/TheoryOfChangeView';
 
 // Standard Lucide icons
 import { Cloud, Wifi, WifiOff, FileSpreadsheet, Download, RefreshCw, AlertCircle, Database, Check } from 'lucide-react';
@@ -451,6 +452,8 @@ export default function App() {
         );
       case 'insights':
         return <InsightsView records={records} />;
+      case 'theory':
+        return <TheoryOfChangeView user={user} />;
       case 'fieldworker':
         return (
           <FieldWorkerView
@@ -513,6 +516,7 @@ export default function App() {
                  activeView === 'records' ? 'Structured Database' :
                  activeView === 'fieldworker' ? 'Field Worker Portal' :
                  activeView === 'insights' ? 'Diagnostic Insights AI' :
+                 activeView === 'theory' ? 'Theory of Change Studio' :
                  'Federated Sync Config'}
               </h2>
               <span className="w-2 h-2 rounded-full bg-brand-emerald animate-pulse" />
@@ -527,6 +531,7 @@ export default function App() {
                activeView === 'records' ? 'Manage detailed data rows, modify values, and add or delete metrics.' :
                activeView === 'fieldworker' ? 'Field workers can register submissions by country and upload file-based evidence.' :
                activeView === 'insights' ? 'AI evaluation of gaps, data verification indices, and operational next steps.' :
+               activeView === 'theory' ? 'Turn project narrative into a structured Theory of Change, indicators, and impact pathway.' :
                'Configure connections, login credentials, and synchronize caches.'}
             </p>
           </div>

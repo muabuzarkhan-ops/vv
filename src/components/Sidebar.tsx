@@ -7,7 +7,8 @@ import {
   Lightbulb, 
   RefreshCw, 
   Edit2,
-  Users
+  Users,
+  Layers
 } from 'lucide-react';
 import { UserState } from '../types';
 
@@ -21,9 +22,12 @@ interface SidebarProps {
 export default function Sidebar({ activeView, onViewChange, user, pendingSyncCount }: SidebarProps) {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'import', label: 'Import Notes', icon: Sparkles },    { id: 'fieldworker', label: 'Field Workers', icon: Users },    { id: 'documents', label: 'Documents', icon: FileUp },
+    { id: 'import', label: 'Import Notes', icon: Sparkles },
+    { id: 'documents', label: 'Documents', icon: FileUp },
     { id: 'records', label: 'Records db', icon: Database },
     { id: 'insights', label: 'Insights AI', icon: Lightbulb },
+    { id: 'theory', label: 'ToC Studio', icon: Layers },
+    { id: 'fieldworker', label: 'Field Workers', icon: Users },
     { id: 'sync', label: 'Sync & Auth', icon: RefreshCw },
     { id: 'admin', label: 'Admin Console', icon: Edit2 },
   ];

@@ -1,12 +1,19 @@
 export interface RecordItem {
   id: string;
   partner: string;
+  projectName?: string;
+  interventionType?: string;
+  targetPopulation?: string;
   theme: string;
   country: string;
   region: string;
   level: string;
   disease: string;
   evidence: string;
+  outcomes?: string;
+  evidenceStatements?: string;
+  risks?: string;
+  lessonsLearned?: string;
   resultType: 'Policy change' | 'Service delivery' | 'Capacity building' | 'Research output' | 'Community engagement' | 'System strengthening';
   reached: number;
   confidence: 'High' | 'Medium' | 'Low';
@@ -17,6 +24,9 @@ export interface RecordItem {
   approvedBy?: string;
   updatedAt?: string;
   updatedBy?: string;
+  projectDate?: string;
+  projectEndDate?: string;
+  fundingStream?: string;
 }
 
 export interface DocumentItem {
@@ -39,14 +49,58 @@ export interface FilterState {
   search: string;
 }
 
+export type UserRole =
+  | 'Partner User'
+  | 'Reviewer'
+  | 'M&E Officer'
+  | 'Country Coordinator'
+  | 'Administrator'
+  | 'Field officer'
+  | 'Analyst'
+  | 'Admin';
+
 export interface UserState {
   name: string;
   email: string;
-  role: 'Field officer' | 'Analyst' | 'Admin';
+  role: UserRole;
   org: string;
   serverUrl: string;
   token?: string;
   authProvider?: 'google' | 'local';
+}
+
+export interface Indicator {
+  title: string;
+  definition: string;
+  formula: string;
+  dataSource: string;
+  frequency: string;
+  baseline: string;
+  target: string;
+}
+
+export interface TheoryOfChangeModel {
+  id: string;
+  projectName: string;
+  sourceDocument: string;
+  description: string;
+  narrative: string;
+  toc: {
+    inputs: string[];
+    activities: string[];
+    outputs: string[];
+    outcomes: string[];
+    intermediateOutcomes: string[];
+    longTermOutcomes: string[];
+    impact: string;
+    assumptions: string[];
+    risks: string[];
+    indicators: Indicator[];
+  };
+  createdAt: string;
+  createdBy?: string;
+  updatedAt: string;
+  updatedBy?: string;
 }
 
 export interface DatabaseState {

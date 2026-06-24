@@ -20,7 +20,14 @@ export const records = pgTable('records', {
   region: text('region').notNull(),
   level: text('level').notNull(),
   disease: text('disease').notNull(),
+  projectName: text('project_name'),
+  interventionType: text('intervention_type'),
+  targetPopulation: text('target_population'),
   evidence: text('evidence').notNull(),
+  outcomes: text('outcomes'),
+  evidenceStatements: text('evidence_statements'),
+  risks: text('risks'),
+  lessonsLearned: text('lessons_learned'),
   resultType: text('result_type').notNull().default('Service delivery'), // 'Policy change' | 'Service delivery' | 'Capacity building' | 'Research output' | 'Community engagement' | 'System strengthening'
   reached: integer('reached').notNull().default(0),
   confidence: text('confidence').notNull().default('Medium'), // 'High' | 'Medium' | 'Low'
@@ -43,6 +50,20 @@ export const documents = pgTable('documents', {
   status: text('status').notNull(), // 'Saved locally' | 'Uploaded to server' | 'Extracted successfully' | 'Failed'
   uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
   content: text('content'),
+});
+
+// Theory of Change storage table
+export const theoryOfChange = pgTable('theory_of_change', {
+  id: text('id').primaryKey(),
+  projectName: text('project_name').notNull(),
+  sourceDocument: text('source_document').notNull(),
+  description: text('description').notNull(),
+  narrative: text('narrative').notNull(),
+  tocJson: text('toc_json').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdBy: text('created_by'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  updatedBy: text('updated_by'),
 });
 
 // Audit logs table
@@ -68,6 +89,13 @@ export const notifications = pgTable('notifications', {
   recipientUid: text('recipient_uid').references(() => users.uid, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+export const theoryOfChangeRelations = relations(theoryOfChange, ({ one }) => ({
+  author: one(users, {
+    fields: [theoryOfChange.createdBy],
+    references: [users.uid],
+  }),
+}));
 
 // Relations definitions
 export const usersRelations = relations(users, ({ many }) => ({

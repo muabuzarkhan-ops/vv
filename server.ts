@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 
 // Import Cloud SQL / Drizzle resources with full extensions
 import { db } from "./src/db/index.ts";
-import { records, users, documents, auditLogs, notifications } from "./src/db/schema.ts";
+import { records, users, documents, auditLogs, notifications, theoryOfChange } from "./src/db/schema.ts";
 import { eq, desc, asc } from "drizzle-orm";
 import { requireAuth, AuthRequest, requireAdmin } from "./src/middleware/auth.ts";
 
@@ -719,6 +719,95 @@ Provide three clear, high-level analytic outputs in a strict structured JSON for
   } catch (error: any) {
     console.error("Gemini Insights API error:", error);
     res.status(500).json({ error: error.message || "Failed to generate AI insights." });
+  }
+});
+
+// AI Theory of Change generator
+app.post("/api/toc/generate", async (req, res) => {
+  try {
+    const { text, projectName, sourceDocument } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ error: "Project narrative text is required." });
+    }
+
+    const ai = getGeminiClient();
+
+    const prompt = `You are an expert Theory of Change architect for international development and NTD programming.
+Extract a structured Theory of Change from the following project narrative. Identify inputs, activities, outputs, outcomes, intermediate outcomes, long-term outcomes, impact, assumptions, risks, and measurable indicators.
+
+Project narrative:
+"${text}"
+
+Return only valid JSON with these fields: projectName, sourceDocument, description, inputs, activities, outputs, outcomes, intermediateOutcomes, longTermOutcomes, impact, assumptions, risks, indicators.
+Use concise yet rich statements suitable for NGO logframes and monitoring frameworks.
+For each indicator, include title, definition, formula, dataSource, frequency, baseline, target.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            projectName: { type: Type.STRING },
+            sourceDocument: { type: Type.STRING },
+            description: { type: Type.STRING },
+            inputs: { type: Type.ARRAY, items: { type: Type.STRING } },
+            activities: { type: Type.ARRAY, items: { type: Type.STRING } },
+            outputs: { type: Type.ARRAY, items: { type: Type.STRING } },
+            outcomes: { type: Type.ARRAY, items: { type: Type.STRING } },
+            intermediateOutcomes: { type: Type.ARRAY, items: { type: Type.STRING } },
+            longTermOutcomes: { type: Type.ARRAY, items: { type: Type.STRING } },
+            impact: { type: Type.STRING },
+            assumptions: { type: Type.ARRAY, items: { type: Type.STRING } },
+            risks: { type: Type.ARRAY, items: { type: Type.STRING } },
+            indicators: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  definition: { type: Type.STRING },
+                  formula: { type: Type.STRING },
+                  dataSource: { type: Type.STRING },
+                  frequency: { type: Type.STRING },
+                  baseline: { type: Type.STRING },
+                  target: { type: Type.STRING }
+                },
+                required: ["title", "definition", "formula", "dataSource", "frequency", "baseline", "target"]
+              }
+            }
+          },
+          required: ["projectName", "sourceDocument", "description", "inputs", "activities", "outputs", "outcomes", "longTermOutcomes", "impact", "assumptions", "risks", "indicators"]
+        }
+      }
+    });
+
+    const resultText = response.text;
+    if (!resultText) {
+      throw new Error("Empty response returned from Gemini Content Generator.");
+    }
+
+    const toc = JSON.parse(resultText);
+    const record = {
+      id: `toc-${Date.now()}`,
+      projectName: toc.projectName || projectName || 'NTD Theory of Change',
+      sourceDocument: toc.sourceDocument || sourceDocument || 'Project narrative',
+      description: toc.description || '',
+      narrative: text,
+      tocJson: JSON.stringify(toc),
+      createdAt: new Date(),
+      createdBy: null,
+      updatedAt: new Date(),
+      updatedBy: null
+    };
+
+    await db.insert(theoryOfChange).values(record);
+    res.json({ success: true, toc });
+  } catch (error: any) {
+    console.error("Gemini ToC API error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate Theory of Change." });
   }
 });
 
